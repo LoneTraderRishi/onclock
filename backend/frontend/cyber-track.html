@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Session Timer - Onclock</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --primary: #6c5ce7;
+      --accent: #00d2d3;
+      --dark: #0a0a0f;
+      --card: #16161d;
+      --text: #ffffff;
+      --text-soft: #a0a0b0;
+      --success: #00b894;
+      --warning: #fdcb6e;
+      --danger: #d63031;
+    }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--dark);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background-image:
+        radial-gradient(ellipse at 50% 0%, rgba(108, 92, 231, 0.15) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 100%, rgba(0, 210, 211, 0.08) 0%, transparent 50%);
+    }
+    .container { max-width: 420px; width: 100%; padding: 20px; }
+    .brand { text-align: center; margin-bottom: 40px; }
+    .brand-logo { height:50px;width:auto;margin-bottom:8px;border-radius:10px; }
+    .brand-name {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 14px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase;
+      background: linear-gradient(135deg, var(--accent), var(--primary));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .timer-card {
+      background: var(--card); border-radius: 24px; padding: 40px 30px; text-align: center;
+      border: 1px solid rgba(255,255,255,0.05); position: relative; overflow: hidden;
+    }
+    .timer-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+      background: linear-gradient(90deg, var(--primary), var(--accent));
+    }
+    .ps-label { font-size: 12px; text-transform: uppercase; letter-spacing: 2px; color: var(--text-soft); margin-bottom: 5px; }
+    .ps-number { font-family: 'Orbitron', sans-serif; font-size: 36px; font-weight: 800; color: var(--accent); margin-bottom: 30px; }
+    .timer-display { margin-bottom: 25px; }
+    .timer-digits {
+      font-family: 'Orbitron', sans-serif; font-size: 64px; font-weight: 900;
+      background: linear-gradient(135deg, var(--success), var(--accent));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; line-height: 1;
+    }
+    .timer-digits.warning {
+      background: linear-gradient(135deg, var(--warning), #e17055);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .timer-digits.critical {
+      background: linear-gradient(135deg, var(--danger), #e17055);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      animation: pulse 1s ease-in-out infinite;
+    }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+    .timer-label { font-size: 12px; text-transform: uppercase; letter-spacing: 3px; color: var(--text-soft); margin-top: 8px; }
+    .progress-bar { width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; margin: 25px 0; overflow: hidden; }
+    .progress-fill { height: 100%; border-radius: 3px; transition: width 1s linear; }
+    .progress-fill.normal { background: linear-gradient(90deg, var(--primary), var(--accent)); }
+    .progress-fill.warning { background: linear-gradient(90deg, var(--warning), #e17055); }
+    .progress-fill.critical { background: linear-gradient(90deg, var(--danger), #ff6b6b); }
+    .session-details { text-align: left; }
+    .detail-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.06); font-size: 14px; }
+    .detail-row:last-child { border-bottom: none; }
+    .detail-label { color: var(--text-soft); }
+    .detail-value { font-weight: 600; }
+    .over-screen { display: none; text-align: center; padding: 30px 0; }
+    .over-screen.show { display: block; }
+    .over-icon { font-size: 64px; margin-bottom: 15px; }
+    .over-title { font-family: 'Orbitron', sans-serif; font-size: 24px; color: var(--danger); margin-bottom: 10px; }
+    .over-sub { color: var(--text-soft); font-size: 14px; }
+    .btn { display: inline-block; padding: 14px 40px; border: none; border-radius: 12px; color: white; font-size: 14px; font-weight: 600; cursor: pointer; text-decoration: none; transition: transform 0.2s, box-shadow 0.2s; }
+    .btn-primary { background: linear-gradient(135deg, var(--primary), #4834d4); }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(108, 92, 231, 0.3); }
+    .loading { text-align: center; padding: 60px 20px; color: var(--text-soft); }
+    .loading .spinner { width: 40px; height: 40px; border: 3px solid rgba(255,255,255,0.1); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 20px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .error, .empty-state { text-align: center; padding: 60px 20px; }
+    .error { color: var(--danger); }
+    .empty-state .emoji { font-size: 64px; margin-bottom: 15px; }
+    .empty-state p { color: var(--text-soft); }
+    .toolbar { margin-top: 20px; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+    .btn-secondary {
+      padding: 12px 24px; background: var(--card); border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px; color: var(--text-soft); font-size: 13px; cursor: pointer;
+      text-decoration: none; transition: all 0.2s;
+    }
+    .btn-secondary:hover { border-color: var(--accent); color: var(--text); }
+
+    /* Payment Card */
+    .payment-card { display: none; background: var(--card); border-radius: 20px; padding: 25px; margin-top: 20px; text-align: center; border: 1px solid rgba(0,210,211,0.15); }
+    .payment-card.show { display: block; }
+    .payment-label { font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: var(--text-soft); margin-bottom: 8px; }
+    .payment-amount { font-family: 'Orbitron', sans-serif; font-size: 48px; font-weight: 800; color: var(--success); margin: 10px 0; }
+    .payment-amount.warning { color: var(--warning); }
+    .upi-id-box { background: var(--dark); border-radius: 12px; padding: 14px 16px; font-family: monospace; font-size: 18px; color: var(--accent); margin: 12px 0; display: flex; align-items: center; justify-content: center; gap: 10px; word-break: break-all; }
+    .upi-id-box button { flex-shrink: 0; background: var(--primary); border: none; color: white; padding: 8px 14px; border-radius: 8px; font-size: 12px; cursor: pointer; }
+    .upi-id-box button:hover { background: #5b4cdb; }
+    .qr-section { margin: 18px 0; }
+    .qr-section img { width: 180px; height: 180px; border-radius: 12px; background: white; padding: 10px; }
+    .pay-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 16px; border: none; border-radius: 14px; color: white; font-size: 15px; font-weight: 600; cursor: pointer; text-decoration: none; transition: transform 0.2s, box-shadow 0.2s; margin-top: 8px; }
+    .pay-btn:hover { transform: translateY(-2px); }
+    .pay-btn.gpay { background: linear-gradient(135deg, #4285F4, #34A853); }
+    .pay-btn.phonepe { background: linear-gradient(135deg, #5F259F, #9B51E0); }
+    .pay-btn.paytm { background: linear-gradient(135deg, #00BAF2, #002970); }
+    .pay-btn.whatsapp { background: #25D366; }
+    .pay-btn.whatsapp:hover { box-shadow: 0 8px 25px rgba(37,211,102,0.3); }
+    .app-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin: 16px 0; }
+    .app-btn { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 14px 8px; background: var(--dark); border-radius: 14px; text-decoration: none; color: white; font-size: 12px; font-weight: 500; transition: all 0.2s; border: 1px solid transparent; }
+    .app-btn:hover { border-color: var(--accent); transform: translateY(-2px); }
+    .app-btn .icon { font-size: 28px; }
+    .pay-note { font-size: 12px; color: var(--text-soft); margin-top: 12px; line-height: 1.5; }
+    @media (max-width: 480px) { .timer-digits { font-size: 48px; } .container { padding: 15px; } .timer-card { padding: 30px 20px; } }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="brand"><img src="/cyber-logo.jpg" alt="Onclock" style="height:60px;width:auto;margin-bottom:6px;border-radius:10px;"><div class="brand-name">ONCLOCK</div></div>
+
+    <div class="loading" id="loadingState"><div class="spinner"></div><p>Loading session...</p></div>
+    <div class="error" id="errorState" style="display:none;"><p>⚠️ Session not found</p><p style="font-size:14px;margin-top:10px;color:var(--text-soft);">This link may be invalid or expired.</p></div>
+    <div class="empty-state" id="emptyState" style="display:none;"><div class="emoji">🎮</div><p>No session ID provided</p><p style="font-size:14px;margin-top:8px;color:var(--text-soft);">Book a station first, then use the tracking link from your booking.</p></div>
+
+    <div class="timer-card" id="timerCard" style="display:none;">
+      <div class="ps-label">PlayStation</div>
+      <div class="ps-number" id="psNumber">--</div>
+
+      <div class="timer-display" id="activeTimer">
+        <div class="timer-digits" id="timerDigits">00:00:00</div>
+        <div class="timer-label">REMAINING</div>
+      </div>
+
+      <div class="over-screen" id="overScreen">
+        <div class="over-icon">🎮</div>
+        <div class="over-title">SESSION OVER</div>
+        <div class="over-sub">Your gaming session has ended. Hope you had fun!</div>
+      </div>
+
+      <div class="progress-bar"><div class="progress-fill normal" id="progressFill" style="width:100%"></div></div>
+
+      <div class="session-details">
+        <div class="detail-row"><span class="detail-label">Player</span><span class="detail-value" id="playerName">--</span></div>
+        <div class="detail-row"><span class="detail-label">Players</span><span class="detail-value" id="numPlayers">--</span></div>
+        <div class="detail-row"><span class="detail-label">Started</span><span class="detail-value" id="startTime">--</span></div>
+        <div class="detail-row"><span class="detail-label">Ends at</span><span class="detail-value" id="endTime">--</span></div>
+        <div class="detail-row"><span class="detail-label">Duration</span><span class="detail-value" id="totalDuration">--</span></div>
+      </div>
+
+      <div class="toolbar">
+        <a class="btn-secondary" href="/cyber/">← All Stations</a>
+        <button class="btn-secondary" onclick="location.reload()">🔄 Refresh</button>
+      </div>
+
+      <!-- Payment Card -->
+      <div class="payment-card" id="paymentCard">
+        <div class="payment-label">Amount Due</div>
+        <div class="payment-amount" id="payAmount">₹0</div>
+        <div style="margin:18px 0;height:1px;background:rgba(255,255,255,0.06);"></div>
+
+        <div class="payment-label">UPI ID</div>
+        <div class="upi-id-box">
+          <span id="upiId">your-upi-id@upi</span>
+          <button onclick="copyUPI()" id="copyUPIBtn">📋 Copy</button>
+        </div>
+
+        <div class="qr-section"><img id="qrCode" src="" alt="Scan to Pay"></div>
+
+        <a class="pay-btn gpay" id="gpayLink" href="#" target="_blank">💳 GPay / Any UPI App</a>
+
+        <div class="app-grid">
+          <a class="app-btn" id="phonepeLink" href="#" target="_blank"><span class="icon">🔵</span>PhonePe</a>
+          <a class="app-btn" id="paytmLink" href="#" target="_blank"><span class="icon">🔶</span>Paytm</a>
+          <a class="app-btn" id="whatsappLink" href="#" target="_blank"><span class="icon">💬</span>WhatsApp</a>
+        </div>
+
+        <a class="pay-btn whatsapp" id="payWhatsApp" href="#" target="_blank">💬 Send Payment Screenshot</a>
+        <div class="pay-note">Pay via any UPI app. After payment, tap WhatsApp to send screenshot to owner.</div>
+      </div>
+    </div>
+    <div style="text-align:center;margin-top:20px;padding-bottom:20px;font-size:10px;color:var(--text-soft);">
+      <a href="#" style="color:var(--text-soft);text-decoration:none;">your-business.in</a>
+      &middot;
+      <a href="#" style="color:var(--text-soft);text-decoration:none;">@your_business</a>
+    </div>
+  </div>
+
+  <script>
+    const API = '';
+    const sessionId = new URLSearchParams(window.location.search).get('session');
+    let totalSeconds = 0, remainingSeconds = 0, timerInterval = null, syncInterval = null;
+
+    if (!sessionId) {
+      document.getElementById('loadingState').style.display = 'none';
+      document.getElementById('emptyState').style.display = 'block';
+    } else {
+      loadSession();
+    }
+
+    async function loadSession() {
+      try {
+        const res = await fetch(`${API}/api/cyber/sessions/${sessionId}`, { cache: 'no-cache' });
+        if (!res.ok) throw new Error('Not found');
+        const data = await res.json();
+        if (!data.ok || !data.session) throw new Error('Invalid');
+        window._sessionData = data;
+        document.getElementById('loadingState').style.display = 'none';
+        document.getElementById('timerCard').style.display = 'block';
+        renderSession(data);
+        if (data.is_active) {
+          totalSeconds = data.session.hours_booked * 3600;
+          remainingSeconds = data.remaining_seconds;
+          startTimer();
+          syncInterval = setInterval(syncSession, 15000);
+        } else {
+          showOver();
+        }
+      } catch(e) {
+        document.getElementById('loadingState').style.display = 'none';
+        document.getElementById('errorState').style.display = 'block';
+        document.getElementById('errorState').innerHTML = '<p>⚠️ Session not found</p><p style="font-size:14px;margin-top:10px;color:var(--text-soft);">This link may be invalid or expired.</p><button onclick="loadSession()" style="margin-top:15px;padding:10px 24px;background:var(--primary);border:none;border-radius:10px;color:white;cursor:pointer;font-size:13px;">🔄 Retry</button>';
+      }
+    }
+
+    async function syncSession() {
+      try {
+        const res = await fetch(`${API}/api/cyber/sessions/${sessionId}`, { cache: 'no-cache' });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (!data.ok) return;
+        remainingSeconds = data.remaining_seconds;
+        if (!data.is_active) { showOver(); stopTimer(); }
+        renderSession(data);
+      } catch(e) {}
+    }
+
+    function renderSession(data) {
+      const s = data.session;
+      document.getElementById('psNumber').textContent = s.playstation_number || '--';
+      document.getElementById('playerName').textContent = s.player_name || 'Guest';
+      document.getElementById('numPlayers').textContent = s.num_players || 1;
+      if (s.start_time) {
+        const start = new Date(s.start_time);
+        document.getElementById('startTime').textContent = start.toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit' }) + ' IST';
+      }
+      if (s.end_time) {
+        const end = new Date(s.end_time);
+        document.getElementById('endTime').textContent = end.toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit' }) + ' IST';
+      }
+      document.getElementById('totalDuration').textContent = hoursLabel(s.hours_booked);
+    }
+
+    function hoursLabel(h) {
+      if (h === 1) return '1:05';
+      if (h === 2) return '2:05';
+      if (h === 3) return '3:05';
+      if (h === 4) return '4:05';
+      if (h === 5) return '5:05';
+      if (h === 6) return '6:05';
+      return h + ':05';
+    }
+
+    function startTimer() {
+      updateDisplay();
+      timerInterval = setInterval(() => {
+        remainingSeconds = Math.max(0, remainingSeconds - 1);
+        updateDisplay();
+        if (remainingSeconds <= 0) { showOver(); stopTimer(); }
+      }, 1000);
+    }
+
+    function stopTimer() {
+      if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+      if (syncInterval) { clearInterval(syncInterval); syncInterval = null; }
+    }
+
+    function updateDisplay() {
+      const hrs = Math.floor(remainingSeconds / 3600);
+      const mins = Math.floor((remainingSeconds % 3600) / 60);
+      const secs = remainingSeconds % 60;
+      const digits = document.getElementById('timerDigits');
+      digits.textContent = `${String(hrs).padStart(2,'0')}:${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
+      digits.className = 'timer-digits';
+      const pct = totalSeconds > 0 ? (remainingSeconds / totalSeconds) * 100 : 0;
+      if (pct < 10) digits.classList.add('critical');
+      else if (pct < 25) digits.classList.add('warning');
+      const fill = document.getElementById('progressFill');
+      fill.style.width = `${pct}%`;
+      fill.className = 'progress-fill';
+      if (pct < 10) fill.classList.add('critical');
+      else if (pct < 25) fill.classList.add('warning');
+      else fill.classList.add('normal');
+    }
+
+    function showOver() {
+      document.getElementById('activeTimer').style.display = 'none';
+      document.getElementById('overScreen').classList.add('show');
+      document.getElementById('timerDigits').textContent = '00:00:00';
+      document.getElementById('progressFill').style.width = '0%';
+
+      // Show payment card
+      const total = window._sessionData && window._sessionData.session ? window._sessionData.session.total_amount : 0;
+      const psNum = document.getElementById('psNumber').textContent;
+      const playerName = document.getElementById('playerName').textContent;
+      document.getElementById('payAmount').textContent = '₹' + total;
+      if (total > 500) document.getElementById('payAmount').classList.add('warning');
+
+      const upi = 'your-upi-id@upi';
+      const upiPIBody = 'pa=' + encodeURIComponent(upi) +
+        '&pn=Onclock&am=' + total + '&cu=INR&tn=PS' + psNum + '%20Gaming';
+      const upiLink = 'upi://pay?' + upiPIBody;
+      const upiEncoded = encodeURIComponent(upiLink);
+
+      document.getElementById('qrCode').src = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&margin=10&data=' + upiEncoded;
+
+      // Universal UPI button (system chooser)
+      document.getElementById('gpayLink').href = upiLink;
+
+      // App-specific deep links for direct open with pre-filled amount & UPI ID
+      document.getElementById('phonepeLink').href = 'phonepe://pay?' + upiPIBody;
+      document.getElementById('paytmLink').href = 'paytmmp://upi/pay?' + upiPIBody;
+
+      const waMsg = encodeURIComponent(
+        '🎮 Payment for Onclock Gaming\n\nStation: PS ' + psNum + '\nPlayer: ' + playerName +
+        '\nAmount: ₹' + total + '\nUPI: ' + upi + '\n\n(Attach payment screenshot)'
+      );
+      document.getElementById('payWhatsApp').href = 'https://wa.me/0000000000?text=' + waMsg;
+      document.getElementById('whatsappLink').href = 'https://wa.me/0000000000?text=Hi,%20my%20PS' + psNum + '%20session%20ended.%20Amount:%20₹' + total;
+
+      document.getElementById('paymentCard').classList.add('show');
+    }
+
+    function copyUPI() {
+      const upi = document.getElementById('upiId').textContent;
+      navigator.clipboard.writeText(upi).then(() => {
+        const btn = document.getElementById('copyUPIBtn');
+        btn.textContent = '✅ Copied!';
+        setTimeout(() => { btn.textContent = '📋 Copy'; }, 2000);
+      }).catch(() => {});
+    }
+  </script>
+<div style="text-align:center;padding:20px;font-size:12px;color:#666;border-top:1px solid #333;margin-top:40px;">Developed by <a href="https://github.com/LoneTraderRishi" style="color:#6c5ce7;text-decoration:none;font-weight:600;">QuantRishi</a></div>
+</body>
+</html>

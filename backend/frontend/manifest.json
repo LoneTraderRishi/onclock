@@ -1,0 +1,24 @@
+{
+  "name": "Onclock — Cyber Cafe",
+  "short_name": "Onclock",
+  "description": "Book gaming stations, track sessions, manage your cyber cafe.",
+  "start_url": "/cyber/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0a0a0f",
+  "theme_color": "#6c5ce7",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-maskable.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}

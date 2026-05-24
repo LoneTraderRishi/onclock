@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Onclock - Customers</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --primary: #6c5ce7;
+      --accent: #00d2d3;
+      --dark: #0a0a0f;
+      --card: #16161d;
+      --text: #ffffff;
+      --text-soft: #a0a0b0;
+      --success: #00b894;
+      --warning: #fdcb6e;
+      --danger: #d63031;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--dark);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ─── Login ─────────────────────────── */
+    .login-wrap {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .login-box {
+      background: var(--card);
+      padding: 40px;
+      border-radius: 20px;
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+    }
+    .login-box h1 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 28px;
+      margin-bottom: 6px;
+      background: linear-gradient(135deg, var(--accent), var(--primary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .login-box p {
+      font-size: 13px;
+      color: var(--text-soft);
+      margin-bottom: 20px;
+    }
+    .login-box input {
+      width: 100%;
+      padding: 15px;
+      background: var(--dark);
+      border: 2px solid #333;
+      border-radius: 12px;
+      color: white;
+      font-size: 16px;
+      margin-bottom: 15px;
+      text-align: center;
+    }
+    .login-box button {
+      width: 100%;
+      padding: 15px;
+      background: linear-gradient(135deg, var(--primary), #4834d4);
+      border: none;
+      border-radius: 12px;
+      color: white;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .dashboard { display: none; }
+    .dashboard.active { display: block; }
+
+    /* ─── Top Bar ────────────────────────── */
+    .top-bar {
+      background: var(--card);
+      padding: 15px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+    .top-bar-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .dashboard-logo-img {
+      height: 36px;
+      width: auto;
+      border-radius: 8px;
+    }
+    .brand-name-text {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 18px;
+      color: var(--accent);
+      line-height: 1.2;
+    }
+    .brand-sub {
+      font-size: 11px;
+      color: var(--text-soft);
+    }
+    .back-btn {
+      padding: 10px 20px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 8px;
+      color: white;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      transition: background 0.15s;
+    }
+    .back-btn:hover { background: rgba(255,255,255,0.12); }
+    .logout-btn {
+      padding: 10px 20px;
+      background: var(--danger);
+      border: none;
+      border-radius: 8px;
+      color: white;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .logout-btn:hover { opacity: 0.85; }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    /* ─── Customers Table ────────────────── */
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .page-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+    .customer-count {
+      font-size: 13px;
+      color: var(--text-soft);
+    }
+    .export-btn {
+      padding: 10px 20px;
+      background: var(--success);
+      border: none;
+      border-radius: 10px;
+      color: white;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .export-btn:hover { opacity: 0.85; }
+
+    .table-wrap {
+      overflow-x: auto;
+      background: var(--card);
+      border-radius: 16px;
+      padding: 20px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+    th {
+      text-align: left;
+      padding: 14px 12px;
+      color: var(--text-soft);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      white-space: nowrap;
+    }
+    td {
+      padding: 14px 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      white-space: nowrap;
+    }
+    tr:last-child td { border: none; }
+    tr:hover td { background: rgba(255,255,255,0.03); }
+    .c-name { font-weight: 600; }
+    .c-phone { color: var(--text-soft); font-size: 13px; font-family: monospace; }
+    .c-visits { text-align: center; }
+    .c-spent { font-weight: 600; color: var(--warning); text-align: right; }
+    .c-last { font-size: 12px; color: var(--text-soft); }
+    .c-favps { text-align: center; color: var(--accent); font-family: 'Orbitron', sans-serif; font-size: 13px; }
+    .wa-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      margin: 2px;
+      padding: 5px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      text-decoration: none;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+    }
+    .wa-btn-send { background: #25D366; color: white; }
+    .wa-btn-custom { background: #444; color: white; }
+    .wa-btn:hover { opacity: 0.85; }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-soft);
+    }
+    .empty-state .big { font-size: 48px; display: block; margin-bottom: 12px; }
+
+    .refresh-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 15px;
+      padding: 12px;
+      background: var(--card);
+      border-radius: 12px;
+    }
+    .refresh-bar span {
+      font-size: 12px;
+      color: var(--text-soft);
+    }
+    .refresh-bar button {
+      padding: 8px 16px;
+      background: var(--primary);
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    /* ─── Loading Skeleton ───────────────── */
+    .skeleton {
+      display: inline-block;
+      background: linear-gradient(90deg, var(--card) 25%, rgba(255,255,255,0.05) 50%, var(--card) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+      border-radius: 4px;
+      height: 14px;
+    }
+    @keyframes shimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    @media (max-width: 600px) {
+      .top-bar { flex-wrap: wrap; }
+      .page-header { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Login -->
+  <div class="login-wrap" id="loginWrap">
+    <div class="login-box">
+      <img src="/cyber-logo.jpg" alt="Onclock" style="height:75px;width:auto;margin-bottom:12px;border-radius:12px;">
+      <h1>👥 Customers</h1>
+      <p>Customer database for marketing</p>
+      <input type="password" id="passwordInput" placeholder="Dashboard password" onkeydown="if(event.key==='Enter')login()">
+      <button onclick="login()">Sign In</button>
+    </div>
+  </div>
+
+  <!-- Dashboard -->
+  <div class="dashboard" id="dashboard">
+    <div class="top-bar">
+      <div class="top-bar-left">
+        <img src="/cyber-logo.jpg" alt="Onclock" class="dashboard-logo-img">
+        <div>
+          <div class="brand-name-text">CUSTOMER DATABASE</div>
+          <div class="brand-sub">Marketing &amp; Outreach</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <a href="/cyber/dashboard" class="back-btn">⬅ Dashboard</a>
+        <button class="logout-btn" onclick="logout()">Logout</button>
+      </div>
+    </div>
+
+    <div class="container">
+      <div class="page-header">
+        <div>
+          <div class="page-title">👥 All Customers</div>
+          <div class="customer-count" id="customerCount">Loading...</div>
+        </div>
+        <button class="export-btn" onclick="exportCsv()">📥 Export CSV</button>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Phone</th>
+              <th>Visits</th>
+              <th>Total Spent</th>
+              <th>Fav PS</th>
+              <th>First Visit</th>
+              <th>Last Visit</th>
+              <th>WhatsApp</th>
+            </tr>
+          </thead>
+          <tbody id="customersBody">
+            <tr><td colspan="8" class="empty-state">Loading customers...</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="refresh-bar">
+        <span>Auto-refreshes every 30s</span>
+        <button onclick="loadCustomers()">🔄 Refresh Now</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API = '';
+    let PASSWORD = '';
+    let pollInterval = null;
+
+    function login() {
+      const pw = document.getElementById('passwordInput').value;
+      PASSWORD = pw;
+      fetch(`${API}/api/cyber/stats`, {
+          headers: { 'Authorization': `Bearer ${pw}` }
+        })
+        .then(r => {
+          if (!r.ok) throw new Error('wrong');
+          document.getElementById('loginWrap').style.display = 'none';
+          document.getElementById('dashboard').classList.add('active');
+          loadCustomers();
+          pollInterval = setInterval(loadCustomers, 30000);
+        })
+        .catch(() => alert('Wrong password'));
+    }
+
+    function logout() {
+      clearInterval(pollInterval);
+      PASSWORD = '';
+      document.getElementById('dashboard').classList.remove('active');
+      document.getElementById('loginWrap').style.display = 'flex';
+    }
+
+    async function loadCustomers() {
+      const tbody = document.getElementById('customersBody');
+      try {
+        const res = await fetch(`${API}/api/cyber/customers`, {
+          headers: { 'Authorization': `Bearer ${PASSWORD}` }
+        });
+        const data = await res.json();
+        document.getElementById('customerCount').textContent = `${data.total_customers} unique customers`;
+
+        if (!data.customers || data.customers.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="8" class="empty-state"><span class="big">📭</span> No customers yet<br>Sessions with phone numbers will appear here</td></tr>`;
+          return;
+        }
+
+        tbody.innerHTML = data.customers.map(c => {
+          const first = c.first_visit ? new Date(c.first_visit).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: '2-digit' }) : '—';
+          const last = c.last_visit ? new Date(c.last_visit).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: '2-digit' }) : '—';
+          const cleanPhone = c.phone.replace(/[^0-9]/g, '');
+          const msg = encodeURIComponent(`Hi ${c.name}! 👋 This is Onclock. Special offers available — come play! 🎮 PS${c.favourite_ps || '1-4'} await you.`);
+          const waUrl = `https://wa.me/91${cleanPhone}?text=${msg}`;
+          const favPs = c.favourite_ps ? `PS ${c.favourite_ps}` : '—';
+          return `<tr>
+            <td class="c-name">${c.name}</td>
+            <td class="c-phone">${c.phone}</td>
+            <td class="c-visits">${c.visit_count}</td>
+            <td class="c-spent">₹${Math.round(c.total_spent)}</td>
+            <td class="c-favps">${favPs}</td>
+            <td class="c-last">${first}</td>
+            <td class="c-last">${last}</td>
+            <td>
+              <a href="${waUrl}" target="_blank" class="wa-btn wa-btn-send" title="Send promo message">💬</a>
+              <button class="wa-btn wa-btn-custom" onclick="customWa('${cleanPhone}', '${c.name}')" title="Custom message">✏️</button>
+            </td>
+          </tr>`;
+        }).join('');
+      } catch(e) {
+        tbody.innerHTML = `<tr><td colspan="8" class="empty-state">Failed to load customers. <button onclick="loadCustomers()" style="background:var(--primary);border:none;color:white;padding:8px 16px;border-radius:8px;cursor:pointer;margin-top:10px;">Retry</button></td></tr>`;
+      }
+    }
+
+    function customWa(phone, name) {
+      const msg = prompt(`Message for ${name}:`, `Hi ${name}! 👋 This is Onclock.`);
+      if (msg) {
+        window.open(`https://wa.me/91${phone}?text=${encodeURIComponent(msg)}`, '_blank');
+      }
+    }
+
+    function exportCsv() {
+      fetch(`${API}/api/cyber/customers`, {
+        headers: { 'Authorization': `Bearer ${PASSWORD}` }
+      })
+      .then(r => r.json())
+      .then(data => {
+        if (!data.customers || data.customers.length === 0) {
+          alert('No customer data to export');
+          return;
+        }
+        const rows = [['Name','Phone','Visits','Total Spent','Favourite PS','First Visit','Last Visit']];
+        data.customers.forEach(c => {
+          const first = c.first_visit ? new Date(c.first_visit).toISOString().split('T')[0] : '';
+          const last = c.last_visit ? new Date(c.last_visit).toISOString().split('T')[0] : '';
+          rows.push([c.name, c.phone, c.visit_count, c.total_spent, c.favourite_ps ? 'PS'+c.favourite_ps : '', first, last]);
+        });
+        const csv = rows.map(r => r.map(v => `"${v}"`).join(',')).join('\n');
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `onclock-customers-${new Date().toISOString().split('T')[0]}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+      })
+      .catch(() => alert('Failed to export'));
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Onclock</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    :root {
+      --primary: #6c5ce7;
+      --primary-dark: #5b4cdb;
+      --accent: #00d2d3;
+      --dark: #0a0a0f;
+      --card: #16161d;
+      --text: #ffffff;
+      --text-soft: #a0a0b0;
+      --success: #00b894;
+      --warning: #fdcb6e;
+      --danger: #d63031;
+    }
+    
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--dark);
+      color: var(--text);
+      min-height: 100vh;
+      background-image: 
+        radial-gradient(ellipse at 20% 20%, rgba(108, 92, 231, 0.15) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 80%, rgba(0, 210, 211, 0.1) 0%, transparent 50%);
+    }
+    
+    .header {
+      text-align: center;
+      padding: 60px 20px;
+      background: linear-gradient(180deg, rgba(108, 92, 231, 0.2) 0%, transparent 100%);
+    }
+    
+    .logo {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 48px;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--accent), var(--primary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 10px;
+    }
+    
+
+    .tagline {
+      color: var(--text-soft);
+      font-size: 18px;
+      letter-spacing: 2px;
+    }
+    
+    .ps-grid {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 40px 20px;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+    }
+    
+    .ps-card {
+      background: var(--card);
+      border-radius: 20px;
+      padding: 30px;
+      text-align: center;
+      border: 2px solid transparent;
+      transition: all 0.3s;
+      cursor: pointer;
+      text-decoration: none;
+      color: white;
+    }
+    
+    .ps-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-5px);
+      box-shadow: 0 10px 40px rgba(0, 210, 211, 0.2);
+    }
+    
+    .ps-card.available {
+      border-color: var(--success);
+    }
+    
+    .ps-card.occupied {
+      border-color: var(--danger);
+      opacity: 0.7;
+    }
+    
+    .ps-number {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 64px;
+      font-weight: 800;
+      color: var(--accent);
+      margin-bottom: 10px;
+    }
+    
+    .ps-name {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    
+    .ps-status {
+      font-size: 12px;
+      padding: 6px 16px;
+      border-radius: 20px;
+      display: inline-block;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    
+    .status-available {
+      background: rgba(0, 184, 148, 0.2);
+      color: var(--success);
+    }
+    
+    .status-occupied {
+      background: rgba(214, 48, 49, 0.2);
+      color: var(--danger);
+    }
+    
+    .price-tag {
+      margin-top: 12px;
+      font-size: 14px;
+      color: var(--warning);
+    }
+    
+    @media (max-width: 480px) {
+      .ps-grid { grid-template-columns: 1fr; }
+      .logo { font-size: 36px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <img src="/cyber-logo.jpg" alt="Onclock" style="height:60px;width:auto;margin-bottom:10px;border-radius:12px;">
+    <div class="logo">ONCLOCK</div>
+    <div class="tagline">SELECT YOUR STATION</div>
+    <div style="font-size:11px;color:var(--text-soft);margin-top:12px;">
+      <a href="#" style="color:var(--text-soft);text-decoration:none;">your-business.in</a>
+      &nbsp;&middot;&nbsp;
+      <a href="#" style="color:var(--text-soft);text-decoration:none;">@your_business</a>
+    </div>
+  </div>
+  
+  <!-- Offers Banner removed per user request -->
+
+  <div class="ps-grid" id="psGrid">
+    <div style="text-align:center;padding:40px;color:var(--text-soft);">Loading stations...</div>
+  </div>
+  <div style="text-align:center;padding:20px;font-size:12px;color:#666;border-top:1px solid #333;margin-top:40px;">Developed by <a href="https://github.com/LoneTraderRishi" style="color:#6c5ce7;text-decoration:none;font-weight:600;">QuantRishi</a></div>
+  <script>
+    const API = '';
+    
+    async function loadStations() {
+      try {
+        const res = await fetch(`${API}/api/cyber/playstations`, { cache: 'no-cache' });
+        if (!res.ok) throw new Error('Server error');
+        const stations = await res.json();
+        renderStations(stations);
+      } catch(e) {
+        console.error('Failed to load stations:', e);
+        const grid = document.getElementById('psGrid');
+        grid.innerHTML = `
+          <div style="text-align:center;padding:40px;">
+            <p style="color:var(--danger);margin-bottom:20px;">Failed to load stations</p>
+            <button onclick="loadStations()" style="padding:12px 30px;background:var(--primary);border:none;border-radius:10px;color:white;cursor:pointer;font-size:14px;">
+              🔄 Retry
+            </button>
+          </div>
+        `;
+      }
+    }
+
+    function renderStations(stations) {
+      const grid = document.getElementById('psGrid');
+      grid.innerHTML = stations
+        .sort((a, b) => a.playstation_number - b.playstation_number)
+        .map(ps => {
+        const isAvailable = ps.status === 'available';
+        return `
+          <a href="/cyber/ps/${ps.playstation_number}" class="ps-card ${ps.status}">
+            <div class="ps-number">${ps.playstation_number}</div>
+            <div class="ps-name">${ps.name}</div>
+            <span class="ps-status ${isAvailable ? 'status-available' : 'status-occupied'}">
+              ${isAvailable ? 'AVAILABLE' : 'IN USE'}
+            </span>
+            <div class="price-tag">₹${ps.hourly_rate}/hr</div>
+          </a>
+        `;
+      }).join('');
+    }
+    
+    loadStations();
+  </script>
+</body>
+</html>

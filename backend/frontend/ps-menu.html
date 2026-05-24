@@ -1,0 +1,1104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PlayStation - Onclock</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    :root {
+      --primary: #6c5ce7;
+      --accent: #00d2d3;
+      --dark: #0a0a0f;
+      --card: #16161d;
+      --text: #ffffff;
+      --success: #00b894;
+      --warning: #fdcb6e;
+      --danger: #d63031;
+    }
+    
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--dark);
+      color: var(--text);
+      min-height: 100vh;
+    }
+    
+    .header {
+      background: linear-gradient(135deg, var(--primary), #4834d4);
+      padding: 40px 20px;
+      text-align: center;
+    }
+    
+    .back-link {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      color: white;
+      text-decoration: none;
+      font-size: 14px;
+      opacity: 0.8;
+    }
+    
+    .ps-number {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 72px;
+      font-weight: 800;
+      color: white;
+    }
+    
+    .ps-label {
+      font-size: 14px;
+      color: rgba(255,255,255,0.7);
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      margin-bottom: 5px;
+    }
+    
+    .content {
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 30px 20px;
+    }
+    
+    .section {
+      background: var(--card);
+      border-radius: 20px;
+      padding: 25px;
+      margin-bottom: 20px;
+    }
+    
+    .section-title {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--accent);
+      margin-bottom: 15px;
+      font-weight: 600;
+    }
+    
+    .players-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+    
+    .player-btn {
+      padding: 15px;
+      border: 2px solid var(--card);
+      background: var(--dark);
+      color: white;
+      border-radius: 12px;
+      font-size: 24px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .player-btn:hover, .player-btn.selected {
+      border-color: var(--accent);
+      background: rgba(0, 210, 211, 0.1);
+    }
+    
+    .player-btn span {
+      display: block;
+      font-size: 10px;
+      color: var(--accent);
+      margin-top: 5px;
+      font-weight: 400;
+    }
+    
+    .hours-selector {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    
+    .hour-btn {
+      flex: 1;
+      min-width: 60px;
+      padding: 15px 10px;
+      border: 2px solid var(--card);
+      background: var(--dark);
+      color: white;
+      border-radius: 12px;
+      font-size: 18px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .hour-btn:hover, .hour-btn.selected {
+      border-color: var(--primary);
+      background: rgba(108, 92, 231, 0.1);
+    }
+    
+    .hour-btn span {
+      display: block;
+      font-size: 10px;
+      color: var(--text-soft, #888);
+      margin-top: 3px;
+      font-weight: 400;
+    }
+    
+    .custom-hours {
+      margin-top: 15px;
+      display: none;
+    }
+    
+    .custom-hours.show {
+      display: block;
+    }
+    
+    .custom-hours input {
+      width: 100%;
+      padding: 15px;
+      background: var(--dark);
+      border: 2px solid var(--card);
+      border-radius: 12px;
+      color: white;
+      font-size: 18px;
+      text-align: center;
+    }
+    
+    .cost-display {
+      text-align: center;
+      padding: 20px;
+      background: linear-gradient(135deg, rgba(108, 92, 231, 0.3), rgba(0, 210, 211, 0.2));
+      border-radius: 16px;
+      margin-bottom: 20px;
+    }
+    
+    .cost-label {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--accent);
+      margin-bottom: 5px;
+    }
+    
+    .cost-amount {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 48px;
+      font-weight: 800;
+    }
+    
+    .cost-detail {
+      font-size: 14px;
+      color: var(--text-soft, #888);
+      margin-top: 5px;
+    }
+    
+    .form-group {
+      margin-bottom: 15px;
+    }
+    
+    .form-group label {
+      display: block;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-soft, #888);
+      margin-bottom: 8px;
+    }
+    
+    .form-group input {
+      width: 100%;
+      padding: 15px;
+      background: var(--dark);
+      border: 2px solid var(--card);
+      border-radius: 12px;
+      color: white;
+      font-size: 16px;
+    }
+    
+    .start-btn {
+      width: 100%;
+      padding: 20px;
+      background: linear-gradient(135deg, var(--success), #00a884);
+      border: none;
+      border-radius: 16px;
+      color: white;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    .start-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(0, 184, 148, 0.3);
+    }
+    
+    .start-btn:disabled {
+      background: #444;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .booking-toggle {
+      display: flex;
+      gap: 10px;
+    }
+    .toggle-btn {
+      flex: 1;
+      padding: 14px 10px;
+      border: 2px solid var(--card);
+      background: var(--dark);
+      color: var(--text-soft);
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .toggle-btn.active {
+      border-color: var(--primary);
+      background: rgba(108, 92, 231, 0.15);
+      color: var(--text);
+    }
+    .toggle-btn:hover {
+      border-color: var(--accent);
+    }
+
+    .success-icon { font-size: 64px; margin-bottom: 15px; }
+    .whatsapp-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 28px;
+      background: #25D366;
+      border: none;
+      border-radius: 12px;
+      color: white;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: transform 0.2s;
+    }
+    .whatsapp-btn:hover { transform: translateY(-2px); }
+
+    .status-badge {
+      text-align: center;
+      padding: 40px;
+    }
+    
+    .status-badge.occupied {
+      background: linear-gradient(135deg, rgba(214, 48, 49, 0.3), rgba(225, 177, 44, 0.2));
+      border-radius: 20px;
+    }
+    
+    #countdownDisplay {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 56px;
+      color: #fff;
+      letter-spacing: 2px;
+    }
+    
+    .time-bar-wrap {
+      width: 100%;
+      height: 8px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 4px;
+      margin-top: 15px;
+      overflow: hidden;
+    }
+    
+    .time-bar {
+      height: 100%;
+      background: var(--success);
+      border-radius: 4px;
+      transition: width 1s linear, background 0.5s;
+    }
+    
+    #extendStatus {
+      min-height: 24px;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+    
+    .status-badge h2 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 24px;
+      color: var(--danger);
+      margin-bottom: 10px;
+    }
+    
+    .session-info {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 20px;
+      margin-top: 20px;
+    }
+    
+    .session-info div {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    
+    .session-info div:last-child {
+      border-bottom: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <a href="/cyber/" class="back-link">← Back to Stations</a>
+    <img src="/cyber-logo.jpg" alt="Onclock" style="height:50px;width:auto;margin-bottom:10px;border-radius:10px;">
+    <div class="ps-label">PlayStation</div>
+    <div class="ps-number" id="psNumber">--</div>
+    <div style="font-size:10px;color:rgba(255,255,255,0.5);margin-top:8px;">
+      <a href="#" style="color:rgba(255,255,255,0.5);text-decoration:none;">your-business.in</a>
+      &nbsp;&middot;&nbsp;
+      <a href="#" style="color:rgba(255,255,255,0.5);text-decoration:none;">@your_business</a>
+    </div>
+  </div>
+
+  <div class="content" id="content">
+    <div class="section">
+      <div class="section-title">Number of Players</div>
+      <div class="players-grid" id="playersGrid">
+        <button class="player-btn selected" data-players="1">1<span>players</span></button>
+        <button class="player-btn" data-players="2">2<span>players</span></button>
+        <button class="player-btn" data-players="3">3<span>players</span></button>
+        <button class="player-btn" data-players="4">4<span>players</span></button>
+        <button class="player-btn" data-players="5">5<span>players</span></button>
+        <button class="player-btn" data-players="6">6<span>players</span></button>
+        <button class="player-btn" data-players="7">7<span>players</span></button>
+        <button class="player-btn" data-players="8">8<span>players</span></button>
+      </div>
+    </div>
+    
+    <div class="section">
+      <div class="section-title">Duration</div>
+      <div class="hours-selector" id="hoursSelector">
+        <button class="hour-btn selected" data-hours="1">1:05<span></span></button>
+        <button class="hour-btn" data-hours="2">2:05<span></span></button>
+        <button class="hour-btn" data-hours="3">3:05<span></span></button>
+        <button class="hour-btn" data-hours="4">4:05<span></span></button>
+        <button class="hour-btn" data-hours="5">5:05<span></span></button>
+        <button class="hour-btn" data-hours="6">6:05<span></span></button>
+      </div>
+      <div style="text-align:left;margin:-8px 0 10px 4px;font-size:13px;color:var(--success);">+5 min FREE buffer</div>
+      <div class="custom-hours" id="customHours">
+        <input type="number" id="customHoursInput" placeholder="Custom hours (0.5 - 12)" min="0.5" max="12" step="0.5">
+      </div>
+    </div>
+    
+    <div class="cost-display">
+      <div class="cost-label">Total Cost</div>
+      <div class="cost-amount" id="totalCost">₹50</div>
+      <div class="cost-detail" id="costDetail">1 player × 1:05 × ₹150/hr</div>
+    </div>
+    
+    <div class="section">
+      <div class="section-title">Your Details</div>
+      <div class="form-group">
+        <label>Name *</label>
+        <input type="text" id="playerName" placeholder="Enter your name" required>
+      </div>
+      <div class="form-group">
+        <label>Phone *</label>
+        <input type="tel" id="playerPhone" placeholder="Enter phone number" required>
+      </div>
+    </div>
+
+    <div class="section" style="margin-bottom:15px;">
+      <div class="section-title">Booking Type</div>
+      <div class="booking-toggle">
+        <button class="toggle-btn active" id="modeNow" onclick="setBookingMode('now')">🎮 Start Now</button>
+        <button class="toggle-btn" id="modeAdvance" onclick="setBookingMode('advance')">📅 Book in Advance</button>
+      </div>
+    </div>
+
+    <div class="section" id="advanceSection" style="display:none;margin-bottom:15px;">
+      <div class="section-title">Schedule Your Session</div>
+      <div class="row" style="display:flex;gap:15px;">
+        <div style="flex:1;">
+          <label for="bookingDate" style="display:block;font-size:12px;text-transform:uppercase;letter-spacing:1px;color:var(--text-soft,#888);margin-bottom:8px;">Date</label>
+          <input type="date" id="bookingDate" style="width:100%;padding:15px;background:var(--dark);border:2px solid var(--card);border-radius:12px;color:white;font-size:16px;">
+        </div>
+        <div style="flex:1;">
+          <label for="bookingTime" style="display:block;font-size:12px;text-transform:uppercase;letter-spacing:1px;color:var(--text-soft,#888);margin-bottom:8px;">Time</label>
+          <input type="time" id="bookingTime" style="width:100%;padding:15px;background:var(--dark);border:2px solid var(--card);border-radius:12px;color:white;font-size:16px;">
+        </div>
+      </div>
+    </div>
+
+    <button class="start-btn" id="startBtn" onclick="handleStartOrBook()">
+      START GAMING 🎮
+    </button>
+  </div>
+
+  <div style="text-align:center;padding:20px;font-size:12px;color:#666;border-top:1px solid #333;margin-top:40px;">Developed by <a href="https://github.com/LoneTraderRishi" style="color:#6c5ce7;text-decoration:none;font-weight:600;">QuantRishi</a></div>
+    <script>
+    const API = '';
+    const UPI_ID = 'your-upi-id@upi';
+    const OWNER_WHATSAPP = '0000000000'; // Owner WhatsApp with country code
+    const psNumber = parseInt(window.location.pathname.split('/').pop()) || 1;
+    let selectedPlayers = 1;
+    let selectedHours = 1;
+    let hourlyRate = 50;
+    let psId = null;
+    let isOccupied = false;
+    let bookingMode = 'now'; // 'now' | 'advance'
+
+    document.getElementById('psNumber').textContent = psNumber;
+
+    // Default date/time picker to tomorrow at nearest hour
+    function initBookingDateTime() {
+      const d = new Date();
+      d.setDate(d.getDate() + 1);
+      document.getElementById('bookingDate').value = d.toISOString().split('T')[0];
+      d.setHours(d.getHours() + 1, 0, 0, 0);
+      const h = String(d.getHours()).padStart(2,'0');
+      const m = String(Math.ceil(d.getMinutes()/30)*30 % 60).padStart(2,'0');
+      document.getElementById('bookingTime').value = `${h}:${m}`;
+    }
+
+    function setBookingMode(mode) {
+      bookingMode = mode;
+      document.getElementById('modeNow').classList.toggle('active', mode === 'now');
+      document.getElementById('modeAdvance').classList.toggle('active', mode === 'advance');
+      document.getElementById('advanceSection').style.display = mode === 'advance' ? 'block' : 'none';
+      const btn = document.getElementById('startBtn');
+      if (mode === 'advance') {
+        btn.textContent = 'BOOK & PAY 💳';
+        initBookingDateTime();
+      } else {
+        btn.textContent = 'START GAMING 🎮';
+      }
+    }
+
+    function handleStartOrBook() {
+      const name = document.getElementById('playerName').value.trim();
+      const phone = document.getElementById('playerPhone').value.trim();
+      if (!name) return alert('Please enter your name');
+      if (!phone) return alert('Please enter your phone number');
+
+      if (bookingMode === 'advance') {
+        bookAdvance(name, phone);
+      } else {
+        startSession(name, phone);
+      }
+    }
+    
+    async function loadStation(retries = 2) {
+      for (let attempt = 0; attempt <= retries; attempt++) {
+        try {
+          const res = await fetch(`${API}/api/cyber/playstations`, {
+            headers: { 'Cache-Control': 'no-cache' },
+            cache: 'no-cache'
+          });
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const stations = await res.json();
+          const station = stations.find(s => s.playstation_number === psNumber);
+
+          if (!station) {
+            document.getElementById('content').innerHTML = '<p style="text-align:center;padding:40px;">Station not found</p>';
+            return;
+          }
+
+          psId = station.id;
+          hourlyRate = station.hourly_rate;
+
+          if (station.status === 'occupied' && station.current_session) {
+            isOccupied = true;
+            window.currentSession = station.current_session;
+            renderOccupied(station.current_session);
+          } else {
+            updateCost();
+          }
+          return; // success — exit
+        } catch(e) {
+          console.error(`loadStation attempt ${attempt + 1} failed:`, e);
+          if (attempt < retries) {
+            await new Promise(r => setTimeout(r, 1500)); // wait before retry
+          } else {
+            document.getElementById('content').innerHTML = `
+    <div style="text-align:center;padding:60px 40px;">
+      <p style="color:var(--danger);font-size:16px;margin-bottom:20px;">Failed to load station data</p>
+      <button onclick="loadStation()" style="padding:12px 30px;background:var(--primary);border:none;border-radius:10px;color:white;cursor:pointer;font-size:14px;">
+        🔄 Retry
+      </button>
+      <br><br>
+      <a href="/cyber/" style="color:var(--text-soft);text-decoration:none;font-size:14px;">← Back to Stations</a>
+    </div>
+  `;
+          }
+        }
+      }
+    }
+    
+    function renderOccupied(session) {
+      const startTime = session.start_time ? session.start_time.split('+')[0] + 'Z' : new Date().toISOString();
+      const endTime = session.end_time ? session.end_time.split('+')[0] + 'Z' : new Date().toISOString();
+      let sessionEnd = new Date(endTime);
+      let sessionId = session.id;
+      
+      function formatTimeLeft(ms) {
+        const totalSecs = Math.floor(ms / 1000);
+        const h = Math.floor(totalSecs / 3600);
+        const m = Math.floor((totalSecs % 3600) / 60);
+        const s = totalSecs % 60;
+        if (h > 0) return `${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+        return `${m}:${String(s).padStart(2,'0')}`;
+      }
+      
+      function updateCountdown() {
+        const now = new Date();
+        const remaining = Math.max(0, sessionEnd - now);
+        const el = document.getElementById('countdownDisplay');
+        const bar = document.getElementById('timeBar');
+        if (el) el.textContent = formatTimeLeft(remaining);
+        const totalMs = sessionEnd - new Date(startTime);
+        if (bar) {
+          const pct = Math.min(100, Math.max(0, (remaining / totalMs) * 100));
+          bar.style.width = pct + '%';
+          if (pct < 15) bar.style.background = 'var(--danger)';
+          else if (pct < 30) bar.style.background = 'var(--warning)';
+          else bar.style.background = 'var(--success)';
+        }
+        if (remaining === 0) {
+          clearInterval(window.countdownInterval);
+          if (el) el.textContent = "TIME'S UP";
+          if (el) el.style.color = 'var(--danger)';
+          if (bar) bar.style.width = '0%';
+          showTimeUpNotification();
+        }
+      }
+      
+      function showTimeUpNotification() {
+        const badge = document.getElementById('sessionBadge');
+        if (badge) {
+          badge.style.animation = 'pulse 0.5s ease-in-out 6';
+          badge.style.border = '3px solid var(--danger)';
+        }
+        
+        const el = document.getElementById('countdownDisplay');
+        let flash = true;
+        const flashInterval = setInterval(() => {
+          if (el) el.style.color = flash ? 'var(--danger)' : '#fff';
+          flash = !flash;
+        }, 500);
+        setTimeout(() => clearInterval(flashInterval), 6000);
+        
+        if (Notification.permission === 'default') {
+          Notification.requestPermission();
+        }
+        if (Notification.permission === 'granted') {
+          new Notification('TIME\'S UP!', {
+            body: `Your gaming session at PS ${psNumber} has ended. Please pay ₹${Math.round(window.currentSession?.total_amount || 0)} at the counter.`,
+            icon: '/icon.svg',
+            tag: 'timeup'
+          });
+        }
+        
+        try {
+          const ctx = new (window.AudioContext || window.webkitAudioContext)();
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.frequency.value = 880;
+          osc.type = 'sine';
+          gain.gain.setValueAtTime(0.5, ctx.currentTime);
+          osc.start(ctx.currentTime);
+          osc.stop(ctx.currentTime + 0.3);
+          setTimeout(() => {
+            const osc2 = ctx.createOscillator();
+            osc2.connect(gain);
+            gain.gain.setValueAtTime(0.5, ctx.currentTime);
+            osc2.frequency.value = 880;
+            osc2.type = 'sine';
+            osc2.start(ctx.currentTime);
+            osc2.stop(ctx.currentTime + 0.3);
+          }, 400);
+          setTimeout(() => {
+            const osc3 = ctx.createOscillator();
+            osc3.connect(gain);
+            gain.gain.setValueAtTime(0.5, ctx.currentTime);
+            osc3.frequency.value = 1100;
+            osc3.type = 'sine';
+            osc3.start(ctx.currentTime);
+            osc3.stop(ctx.currentTime + 0.6);
+          }, 800);
+        } catch(e) {}
+      }
+      
+      const extraHours = [1, 2, 3];
+      
+      document.getElementById('content').innerHTML = `
+        <div class="status-badge occupied" id="sessionBadge">
+          <h2 id="countdownDisplay">--:--</h2>
+          <p>time remaining</p>
+          <div class="time-bar-wrap"><div class="time-bar" id="timeBar"></div></div>
+        </div>
+        <div class="session-info">
+          <div><span>Station</span><span style="color:var(--accent)">PS ${psNumber}</span></div>
+          <div><span>Name</span><span>${session.player_name || 'Guest'}</span></div>
+          <div><span>Phone</span><span>${session.player_phone || '—'}</span></div>
+          <div><span>Players</span><span>${session.num_players}</span></div>
+          <div><span>Started</span><span>${new Date(startTime).toLocaleTimeString()}</span></div>
+          <div><span>Ends at</span><span>${sessionEnd.toLocaleTimeString()}</span></div>
+        </div>
+        <div class="section">
+          <div class="section-title">Extend Time</div>
+          <div class="hours-selector" id="extendHoursSelector">
+            ${[1,2,3,4,5,6].map(h => `
+              <button class="hour-btn ${h === 1 ? 'selected' : ''}" data-hours="${h}">
+                ${h}<span>hrs</span>
+              </button>
+            `).join('')}
+          </div>
+          <button class="start-btn" style="margin-top:15px;" onclick="extendTime()">⏱ Extend Session</button>
+          <div id="extendStatus" style="text-align:center;padding:10px;color:var(--success);font-size:14px;"></div>
+        </div>
+        ${upiPaySection(Math.round(window.currentSession?.total_amount || 0))}
+      `;
+
+      // Click handler for extend hours
+      document.getElementById('extendHoursSelector')?.addEventListener('click', e => {
+        const btn = e.target.closest('.hour-btn');
+        if (!btn) return;
+        document.querySelectorAll('#extendHoursSelector .hour-btn').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        window._extendHours = parseInt(btn.dataset.hours);
+      });
+      window._extendHours = 1; // default
+      
+      updateCountdown();
+      window.countdownInterval = setInterval(updateCountdown, 1000);
+    }
+    
+    async function extendTime() {
+      const hours = window._extendHours || 1;
+      const rate = hourlyRate;
+      const name = prompt('Enter your name to confirm extension:');
+      if (!name) return;
+      const phone = prompt('Enter your phone:') || '';
+      const sid = window.currentSession?.id;
+      if (!sid) { alert('Session not found'); return; }
+      try {
+        const res = await fetch(`${API}/api/cyber/sessions/${sid}/extend`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ player_name: name, player_phone: phone, hours: hours })
+        });
+        const data = await res.json();
+        if (data.ok) {
+          document.getElementById('extendStatus').textContent = `Added ${hours}h — pay ₹${hours * rate} at counter`;
+          document.getElementById('extendStatus').style.display = 'block';
+          clearInterval(window.countdownInterval);
+          renderOccupied({ ...window.currentSession, end_time: data.new_end_time });
+        } else {
+          alert(data.detail || 'Failed to extend');
+        }
+      } catch(e) {
+        alert('Error extending time');
+      }
+    }
+    
+    function selectPlayers(n) {
+      selectedPlayers = n;
+      document.querySelectorAll('.player-btn').forEach(btn => {
+        btn.classList.toggle('selected', parseInt(btn.dataset.players) === n);
+      });
+      updateCost();
+    }
+    
+    function selectHours(h) {
+      selectedHours = h;
+      document.querySelectorAll('.hour-btn').forEach(btn => {
+        btn.classList.toggle('selected', parseInt(btn.dataset.hours) === h);
+      });
+      document.getElementById('customHours').classList.remove('show');
+      updateCost();
+    }
+    
+    function hoursLabel(h) {
+      if (h === 1) return '1:05';
+      if (h === 2) return '2:05';
+      if (h === 3) return '3:05';
+      if (h === 4) return '4:05';
+      if (h === 5) return '5:05';
+      if (h === 6) return '6:05';
+      return h + ':05';
+    }
+    function updateCost() {
+      const effectiveRate = selectedPlayers <= 1 ? hourlyRate : 125 * selectedPlayers;
+      const total = selectedHours * effectiveRate;
+      document.getElementById('totalCost').textContent = `₹${total}`;
+      document.getElementById('costDetail').textContent = 
+        `${selectedPlayers} player${selectedPlayers > 1 ? 's' : ''} × ${hoursLabel(selectedHours)} × ₹${selectedPlayers <= 1 ? hourlyRate : 125}/hr`;
+    }
+
+    function upiPaySection(amount) {
+      const upiPIBody = `pa=${UPI_ID}&pn=Onclock&am=${amount}&cu=INR`;
+      const upiLink = `upi://pay?${upiPIBody}`;
+      return `
+        <div style="background:var(--card);border:1px solid rgba(108,92,231,0.3);border-radius:16px;padding:20px;margin:20px 0;">
+          <div style="font-size:12px;text-transform:uppercase;letter-spacing:2px;color:var(--primary);margin-bottom:12px;font-weight:600;">💳 Payment</div>
+          <div style="text-align:center;margin-bottom:15px;">
+            <img src="/upi-qr.jpg" alt="UPI QR Code" style="width:200px;height:auto;border-radius:12px;background:white;padding:8px;border:2px solid rgba(108,92,231,0.2);">
+            <div style="margin-top:8px;">
+              <a href="/upi-qr.jpg" download="onclock-upi-qr.jpg" style="display:inline-block;padding:6px 14px;background:var(--primary);color:white;border-radius:8px;font-size:11px;text-decoration:none;font-weight:600;">⬇ Download QR</a>
+            </div>
+          </div>
+          <div style="background:#0a0a0f;border-radius:10px;padding:12px 15px;font-family:monospace;font-size:14px;color:var(--accent);text-align:center;margin-bottom:15px;word-break:break-all;">
+            ${UPI_ID}
+            <button onclick="navigator.clipboard.writeText('${UPI_ID}').then(()=>this.textContent='✅ Copied!');setTimeout(()=>this.textContent='📋 Copy',2000)" style="background:var(--primary);border:none;color:white;padding:4px 10px;border-radius:6px;font-size:11px;cursor:pointer;margin-left:8px;">📋 Copy</button>
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <a href="${upiLink}" target="_blank" style="flex:1;min-width:80px;padding:12px 8px;background:#6c5ce7;border:none;border-radius:10px;color:white;font-weight:600;font-size:12px;cursor:pointer;text-decoration:none;text-align:center;">UPI</a>
+            <a href="paytmmp://upi/pay?${upiPIBody}" target="_blank" style="flex:1;min-width:80px;padding:12px 8px;background:#00BAF2;border:none;border-radius:10px;color:white;font-weight:600;font-size:12px;cursor:pointer;text-decoration:none;text-align:center;">Paytm</a>
+            <a href="phonepe://pay?${upiPIBody}" target="_blank" style="flex:1;min-width:80px;padding:12px 8px;background:#5F259F;border:none;border-radius:10px;color:white;font-weight:600;font-size:12px;cursor:pointer;text-decoration:none;text-align:center;">PhonePe</a>
+            <a href="tez://upi/pay?${upiPIBody}" target="_blank" style="flex:1;min-width:80px;padding:12px 8px;background:#4285F4;border:none;border-radius:10px;color:white;font-weight:600;font-size:12px;cursor:pointer;text-decoration:none;text-align:center;">GPay</a>
+          </div>
+        </div>`;
+    }
+    
+    document.getElementById('playersGrid').addEventListener('click', e => {
+      const btn = e.target.closest('.player-btn');
+      if (btn) selectPlayers(parseInt(btn.dataset.players));
+    });
+    
+    document.getElementById('hoursSelector').addEventListener('click', e => {
+      const btn = e.target.closest('.hour-btn');
+      if (btn) selectHours(parseInt(btn.dataset.hours));
+    });
+    
+    document.getElementById('customHoursInput').addEventListener('input', e => {
+      const val = parseFloat(e.target.value);
+      if (val > 0) {
+        selectedHours = val;
+        document.querySelectorAll('.hour-btn').forEach(btn => btn.classList.remove('selected'));
+        updateCost();
+      }
+    });
+    
+    async function startSession(name, phone) {
+      try {
+        const res = await fetch(`${API}/api/cyber/sessions/start`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            playstation_id: psId,
+            player_name: name,
+            player_phone: phone,
+            num_players: selectedPlayers,
+            hours: selectedHours
+          })
+        });
+        
+        const data = await res.json();
+        if (data.ok) {
+          // Save to localStorage for auto-detect
+          const saved = JSON.parse(localStorage.getItem('active_sessions') || '[]');
+          // Remove any old session for this PS
+          const filtered = saved.filter(s => s.ps_number !== psNumber);
+          filtered.push({
+            session_id: data.session_id,
+            ps_number: psNumber,
+            player_name: name,
+            hours: selectedHours,
+            started_at: new Date().toISOString()
+          });
+          localStorage.setItem('active_sessions', JSON.stringify(filtered));
+
+          const trackingUrl = `${window.location.origin}/cyber/track?session=${data.session_id}`;
+          const waLink = `https://wa.me/?text=${encodeURIComponent('🎮 PS ' + psNumber + ' session active!\nTrack your time: ' + trackingUrl)}`;
+
+          const res2 = await fetch(`${API}/api/cyber/playstations`, { cache: 'no-cache' });
+          const stations = await res2.json();
+          const station = stations.find(s => s.playstation_number === psNumber);
+          if (station && station.status === 'occupied' && station.current_session) {
+            window.currentSession = station.current_session;
+            renderOccupied(station.current_session);
+          } else {
+            document.getElementById('content').innerHTML = `
+            <div style="text-align:center;padding:60px 20px;">
+              <div style="font-size:80px;margin-bottom:20px;">🎮</div>
+              <h2 style="font-family:Orbitron;font-size:28px;color:var(--success);margin-bottom:10px;">GAME ON!</h2>
+              <p style="color:var(--text-soft);">Your session has started</p>
+              <div style="background:var(--card);border-radius:16px;padding:25px;margin-top:30px;text-align:left;">
+                <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.1);">
+                  <span>Station</span><span style="color:var(--accent)">PS ${psNumber}</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.1);">
+                  <span>Duration</span><span>${selectedHours} hours</span>
+                </div>
+              </div>
+            </div>`;
+          }
+
+          // Append tracking link banner to the content
+          const trackingBanner = document.createElement('div');
+          trackingBanner.style.cssText = 'max-width:480px;margin:0 auto;padding:0 20px 30px;';
+          trackingBanner.innerHTML = `
+            <div style="background:var(--card);border-radius:16px;padding:20px;border:1px solid rgba(0,210,211,0.2);">
+              <div style="font-size:12px;text-transform:uppercase;letter-spacing:2px;color:var(--accent);margin-bottom:12px;font-weight:600;">
+                🔗 Track Your Session
+              </div>
+              <p style="font-size:13px;color:var(--text-soft);margin-bottom:12px;">
+                Bookmark this link to see your live countdown:
+              </p>
+              <div style="background:#0a0a0f;border-radius:10px;padding:12px 15px;font-size:12px;color:var(--accent);word-break:break-all;font-family:monospace;margin-bottom:15px;">
+                <a href="${trackingUrl}" style="color:var(--accent);text-decoration:none;" target="_blank">${trackingUrl}</a>
+                <button onclick="navigator.clipboard.writeText('${trackingUrl}').then(()=>this.textContent='✅ Copied!').catch(()=>{});setTimeout(()=>this.textContent='📋 Copy',2000)"
+                  style="background:var(--primary);border:none;color:white;padding:6px 12px;border-radius:6px;font-size:11px;cursor:pointer;margin-left:8px;">
+                  📋 Copy
+                </button>
+              </div>
+              <div style="background:#0a0a0f;border-radius:10px;padding:15px;margin-bottom:15px;text-align:center;">
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(trackingUrl)}" alt="QR Code" style="background:white;padding:8px;border-radius:10px;width:160px;height:160px;">
+              </div>
+              <div style="display:flex;justify-content:center;gap:12px;flex-wrap:wrap;">
+                <a href="${trackingUrl}" target="_blank" style="flex:1;min-width:120px;padding:12px;background:linear-gradient(135deg,var(--success),#00a884);border:none;border-radius:10px;color:white;font-weight:600;font-size:13px;cursor:pointer;text-decoration:none;text-align:center;">
+                  ⏱ View Timer
+                </a>
+                <a href="${waLink}" target="_blank" style="flex:1;min-width:120px;padding:12px;background:#25D366;border:none;border-radius:10px;color:white;font-weight:600;font-size:13px;cursor:pointer;text-decoration:none;text-align:center;">
+                  📱 Save to WhatsApp
+                </a>
+              </div>
+            </div>
+            <p style="text-align:center;font-size:12px;color:var(--text-soft);margin-top:15px;">
+              Please pay ₹${data.total} at the counter when done
+            </p>
+          `;
+          document.getElementById('content').parentNode.appendChild(trackingBanner);
+          // Append UPI payment section after tracking banner
+          const upiDiv = document.createElement('div');
+          upiDiv.style.cssText = 'max-width:480px;margin:0 auto;padding:0 20px 30px;';
+          upiDiv.innerHTML = upiPaySection(Math.round(data.total));
+          document.getElementById('content').parentNode.appendChild(upiDiv);
+        } else {
+          alert('Failed to start session: ' + (data.detail || 'Unknown error'));
+        }
+      } catch(e) {
+        alert('Error starting session');
+      }
+    }
+
+    async function bookAdvance(name, phone) {
+      const dateVal = document.getElementById('bookingDate').value;
+      const timeVal = document.getElementById('bookingTime').value;
+      if (!dateVal || !timeVal) return alert('Please select a date and time for your booking');
+      
+      // Convert IST to UTC before sending — backend stores all times in UTC
+      const localDate = new Date(`${dateVal}T${timeVal}:00+05:30`);
+      const scheduledStart = localDate.toISOString();
+      const btn = document.getElementById('startBtn');
+      btn.disabled = true;
+      btn.textContent = 'Booking…';
+      
+      try {
+        const res = await fetch(`${API}/api/cyber/sessions/book`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            playstation_id: psId,
+            player_name: name,
+            player_phone: phone,
+            num_players: selectedPlayers,
+            hours: selectedHours,
+            scheduled_start: scheduledStart,
+          })
+        });
+        
+        const data = await res.json();
+        btn.disabled = false;
+        
+        if (data.ok) {
+          const waMsg = encodeURIComponent(
+            `🎮 *New Booking - PS ${psNumber}*\n\n` +
+            `Name: ${name}\n` +
+            `Phone: ${phone}\n` +
+            `Date: ${dateVal}\n` +
+            `Time: ${timeVal}\n` +
+            `Duration: ${hoursLabel(selectedHours)}\n` +
+            `Players: ${selectedPlayers}\n` +
+            `Total: ₹${data.total}\n` +
+            `Booking ID: ${data.booking_id}\n\n` +
+            `✅ *Please find payment screenshot attached.*`
+          );
+          const waUrl = `https://wa.me/${OWNER_WHATSAPP}?text=${waMsg}`;
+          
+          document.getElementById('content').innerHTML = `
+            <div style="text-align:center;">
+              <div class="success-icon">✅</div>
+              <h2 style="font-family:Orbitron;font-size:22px;color:var(--success);margin-bottom:8px;">BOOKING CONFIRMED!</h2>
+              <p style="color:var(--text-soft);font-size:14px;margin-bottom:25px;">
+                Pay via UPI and send screenshot to owner on WhatsApp
+              </p>
+              <div style="background:var(--card);border-radius:16px;padding:20px;margin-bottom:20px;text-align:left;">
+                <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.1);">
+                  <span style="color:var(--text-soft);">Station</span><span style="color:var(--accent);font-weight:600;">PS ${psNumber}</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.1);">
+                  <span style="color:var(--text-soft);">Scheduled</span><span style="font-weight:600;">${dateVal} at ${timeVal}</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.1);">
+                  <span style="color:var(--text-soft);">Duration</span><span style="font-weight:600;">${hoursLabel(selectedHours)}</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.1);">
+                  <span style="color:var(--text-soft);">Players</span><span style="font-weight:600;">${selectedPlayers}</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;padding:8px 0;">
+                  <span style="color:var(--text-soft);">Total</span><span style="color:var(--success);font-size:20px;font-weight:700;">₹${data.total}</span>
+                </div>
+              </div>
+              ${upiPaySection(Math.round(data.total))}
+              <div style="background:var(--card);border:2px solid #25D366;border-radius:16px;padding:20px;margin-bottom:20px;">
+                <div style="font-size:12px;text-transform:uppercase;letter-spacing:2px;color:#25D366;margin-bottom:12px;font-weight:600;">📸 Send Payment Screenshot</div>
+                <p style="font-size:13px;color:var(--text-soft);margin-bottom:15px;">
+                  After paying via UPI, send the payment screenshot to the owner on WhatsApp:
+                </p>
+                <a href="${waUrl}" target="_blank" class="whatsapp-btn">
+                  💬 Send to WhatsApp
+                </a>
+                <p style="font-size:12px;color:var(--text-soft);margin-top:15px;">
+                  Booking ID: <strong>#${data.booking_id}</strong> — mention this when sending
+                </p>
+              </div>
+              <p style="font-size:12px;color:var(--text-soft);">
+                ⏳ Waiting for owner to confirm after payment verification
+              </p>
+            </div>
+          `;
+        } else {
+          alert('Booking failed: ' + (data.detail || 'Unknown error'));
+          btn.textContent = 'BOOK & PAY 💳';
+        }
+      } catch(e) {
+        alert('Error creating booking');
+        btn.disabled = false;
+        btn.textContent = 'BOOK & PAY 💳';
+      }
+    }
+
+    loadStation();
+
+    // localStorage auto-detect: validate cached sessions against server
+    // (prevents stale banners when session expired server-side)
+    setTimeout(async () => {
+      try {
+        const saved = JSON.parse(localStorage.getItem('active_sessions') || '[]');
+        const cached = saved.find(s => s.ps_number === psNumber);
+        if (!cached || isOccupied) return;
+
+        // Validate against server
+        const res = await fetch(`${API}/api/cyber/playstations`, { cache: 'no-cache' });
+        const stations = await res.json();
+        const station = stations.find(s => s.playstation_number === psNumber);
+
+        if (station && station.status === 'available') {
+          // Session is not actually active on server — clean up localStorage
+          const remaining = saved.filter(s => s.ps_number !== psNumber);
+          localStorage.setItem('active_sessions', JSON.stringify(remaining));
+          return;
+        }
+
+        // Server confirms it's occupied, or we can't tell — show banner based on local time
+        const elapsed = (Date.now() - new Date(cached.started_at).getTime()) / 3600000;
+        if (elapsed < cached.hours) {
+          const trackUrl = `${window.location.origin}/cyber/track?session=${cached.session_id}`;
+          const banner = document.createElement('div');
+          banner.style.cssText = 'background:var(--card);border:1px solid var(--accent);border-radius:16px;padding:16px;margin-bottom:20px;text-align:center;';
+          banner.innerHTML = `
+            <div style="font-size:12px;text-transform:uppercase;letter-spacing:2px;color:var(--accent);margin-bottom:8px;">🔁 You have an active session</div>
+            <a href="${trackUrl}" style="color:var(--success);font-weight:600;text-decoration:none;font-size:14px;">
+              ⏱ View your live timer →
+            </a>
+          `;
+          const content = document.getElementById('content');
+          content.insertBefore(banner, content.firstChild);
+        } else {
+          const remaining = saved.filter(s => s.ps_number !== psNumber);
+          localStorage.setItem('active_sessions', JSON.stringify(remaining));
+        }
+      } catch(e) {
+        // Server unreachable — silently skip (page already loaded)
+      }
+    }, 500);
+
+    setInterval(async () => {
+      if (!isOccupied) return;
+      try {
+        const res = await fetch(`${API}/api/cyber/sessions/check-expired`, { cache: 'no-cache' });
+        const data = await res.json();
+        if (data.expired && data.expired.length > 0) {
+          const currentExpired = data.expired.find(s => s.id === window.currentSession?.id);
+          if (currentExpired) {
+            clearInterval(window.countdownInterval);
+            showTimeUpNotification();
+            const hours = window.currentSession?.hours_booked || 0;
+            const rate = window.currentSession?.rate_per_hour || hourlyRate;
+            const total = window.currentSession?.total_amount || (hours * rate);
+            document.getElementById('content').innerHTML = `
+              <div class="status-badge occupied" id="sessionBadge" style="border:3px solid var(--danger);">
+                <h2 id="countdownDisplay" style="color:var(--danger);">TIME'S UP</h2>
+                <p>Session ended</p>
+              </div>
+              <div class="session-info">
+                <div><span>Duration</span><span>${hours} hr${hours !== 1 ? 's' : ''}</span></div>
+                <div><span>Rate</span><span>₹${rate}/hr</span></div>
+                <div><span>Total</span><span style="color:var(--warning);font-size:20px;font-weight:700;">₹${Math.round(total)}</span></div>
+              </div>
+              <p style="text-align:center;padding:30px 0 10px;color:var(--text-soft);">Your session has ended. Please pay ₹${Math.round(total)} using the options below:</p>
+              ${upiPaySection(Math.round(total))}
+              <a href="/cyber/" style="display:block;text-align:center;padding:15px;background:var(--primary);color:white;text-decoration:none;border-radius:12px;margin-top:15px;">Back to Stations</a>
+            `;
+            isOccupied = false;
+            return;
+          }
+        }
+        const res2 = await fetch(`${API}/api/cyber/playstations`, { cache: 'no-cache' });
+        const stations = await res2.json();
+        const station = stations.find(s => s.playstation_number === psNumber);
+        if (station && station.status === 'available' && !station.current_session) {
+          clearInterval(window.countdownInterval);
+          const hours = window.currentSession?.hours_booked || 0;
+          const rate = window.currentSession?.rate_per_hour || hourlyRate;
+          const total = window.currentSession?.total_amount || (hours * rate);
+          document.getElementById('content').innerHTML = `
+            <div style="text-align:center;padding:60px 20px;">
+              <div style="font-size:80px;margin-bottom:20px;">🎉</div>
+              <h2 style="font-family:Orbitron;font-size:28px;color:var(--success);margin-bottom:10px;">THANK YOU!</h2>
+              <p style="color:var(--text-soft);margin-bottom:30px;">Hope you had a great time!</p>
+              <div style="background:var(--card);border-radius:16px;padding:25px;text-align:left;">
+                <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.1);">
+                  <span>Station</span><span style="color:var(--accent)">PS ${psNumber}</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.1);">
+                  <span>Duration</span><span>${hours} hr${hours !== 1 ? 's' : ''}</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.1);">
+                  <span>Rate</span><span>₹${rate}/hr</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;padding:10px 0;">
+                  <span>Total</span><span style="color:var(--warning);font-size:24px;font-weight:700;">₹${Math.round(total)}</span>
+                </div>
+              </div>
+              <p style="font-size:14px;color:var(--text-soft);margin-top:20px;">Please pay ₹${Math.round(total)} using the options below:</p>
+              ${upiPaySection(Math.round(total))}
+            </div>
+            <a href="/cyber/" style="display:block;text-align:center;padding:15px;background:var(--primary);color:white;text-decoration:none;border-radius:12px;margin:15px;">Play Again</a>
+          `;
+          isOccupied = false;
+        }
+      } catch(e) {}
+    }, 30000);
+  </script>
+</body>
+</html>

@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PS QR Codes — Onclock</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #0f0f0f;
+    color: #eee;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    padding: 20px;
+    min-height: 100vh;
+  }
+  h1 {
+    text-align: center;
+    font-size: 24px;
+    margin-bottom: 8px;
+    background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .subtitle {
+    text-align: center;
+    color: #888;
+    font-size: 13px;
+    margin-bottom: 30px;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  .card {
+    background: #1a1a1a;
+    border: 1px solid #2a2a2a;
+    border-radius: 16px;
+    padding: 24px;
+    text-align: center;
+    transition: border-color 0.2s;
+  }
+  .card:hover {
+    border-color: #6c5ce7;
+  }
+  .ps-number {
+    font-size: 28px;
+    font-weight: 800;
+    color: #6c5ce7;
+    margin-bottom: 4px;
+  }
+  .ps-name {
+    font-size: 14px;
+    color: #aaa;
+    margin-bottom: 16px;
+  }
+  .qr-wrapper {
+    background: #fff;
+    border-radius: 12px;
+    padding: 12px;
+    display: inline-block;
+    margin-bottom: 12px;
+  }
+  .qr-wrapper img {
+    width: 160px;
+    height: 160px;
+    display: block;
+  }
+  .qr-link {
+    display: block;
+    font-size: 11px;
+    color: #6c5ce7;
+    word-break: break-all;
+    margin-top: 4px;
+    text-decoration: none;
+  }
+  .print-btn {
+    display: block;
+    width: 200px;
+    margin: 30px auto;
+    padding: 12px 24px;
+    background: #6c5ce7;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .print-btn:hover { background: #5a4bd1; }
+  .loading {
+    text-align: center;
+    color: #888;
+    padding: 60px;
+    font-size: 16px;
+  }
+  .error {
+    text-align: center;
+    color: #e74c3c;
+    padding: 40px;
+  }
+  .back-link {
+    display: inline-block;
+    margin-bottom: 20px;
+    color: #6c5ce7;
+    text-decoration: none;
+    font-size: 14px;
+  }
+  .back-link:hover { text-decoration: underline; }
+  .status-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+  .status-available { background: #00b89420; color: #00b894; border: 1px solid #00b89440; }
+  .status-occupied { background: #e1705520; color: #e17055; border: 1px solid #e1705540; }
+
+  @media print {
+    body { background: #fff; padding: 10px; }
+    .card { break-inside: avoid; border: 1px solid #ddd; background: #fff; }
+    .ps-number { color: #333; }
+    .print-btn, .back-link, h1, .subtitle { display: none; }
+    .grid { gap: 10px; }
+  }
+</style>
+</head>
+<body>
+  <a href="/cyber/dashboard" class="back-link">← Back to Dashboard</a>
+  <h1>📱 Station QR Codes</h1>
+  <p class="subtitle">Print these out — stick them on each PS station for easy customer booking</p>
+  <button class="print-btn" onclick="window.print()">🖨️ Print All</button>
+  <div class="grid" id="qrGrid">
+    <div class="loading">Loading stations...</div>
+  </div>
+
+<script>
+  const API = '';
+  const BASE_URL = window.location.origin;
+
+  async function loadQRs() {
+    try {
+      const res = await fetch(`${API}/api/cyber/playstations`, { cache: 'no-cache' });
+      if (!res.ok) throw new Error('Failed to load');
+      const stations = await res.json();
+      const grid = document.getElementById('qrGrid');
+
+      if (!stations || stations.length === 0) {
+        grid.innerHTML = '<div class="error">No stations found. Add stations from the dashboard first.</div>';
+        return;
+      }
+
+      grid.innerHTML = stations.sort((a, b) => a.playstation_number - b.playstation_number).map(ps => {
+        const bookingUrl = `${BASE_URL}/cyber/ps/${ps.playstation_number}`;
+        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&margin=10&data=${encodeURIComponent(bookingUrl)}`;
+        const statusClass = ps.status === 'occupied' ? 'status-occupied' : 'status-available';
+        const statusText = ps.status === 'occupied' ? '🔴 IN USE' : '🟢 Available';
+        
+        return `
+          <div class="card">
+            <div class="ps-number">PS ${ps.playstation_number}</div>
+            <div class="ps-name">${ps.name}</div>
+            <span class="status-badge ${statusClass}">${statusText}</span>
+            <div class="qr-wrapper">
+              <img src="${qrUrl}" alt="QR for PS ${ps.playstation_number}" loading="lazy">
+            </div>
+            <a class="qr-link" href="${bookingUrl}" target="_blank">${bookingUrl}</a>
+          </div>
+        `;
+      }).join('');
+    } catch(e) {
+      document.getElementById('qrGrid').innerHTML = `<div class="error">❌ Failed to load: ${e.message}</div>`;
+    }
+  }
+
+  loadQRs();
+</script>
+<div style="text-align:center;padding:20px;font-size:12px;color:#666;border-top:1px solid #333;margin-top:40px;">
+  Developed by <a href="https://github.com/LoneTraderRishi" style="color:#6c5ce7;text-decoration:none;font-weight:600;">QuantRishi</a>
+</div>
+</body>
+</html>
