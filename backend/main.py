@@ -264,9 +264,9 @@ async def serve_index():
     return FileResponse(FRONTEND_DIR / "index.html")
 
 
-@app.get("/cyber-logo.jpg")
-async def cyber_logo():
-    f = FRONTEND_DIR / "cyber-logo.jpg"
+@app.get("/onclock-logo.jpg")
+async def onclock_logo():
+    f = FRONTEND_DIR / "onclock-logo.jpg"
     if not f.exists():
         raise HTTPException(404)
     return FileResponse(f, media_type="image/jpeg")
