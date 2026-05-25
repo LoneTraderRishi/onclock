@@ -130,7 +130,7 @@
 </style>
 </head>
 <body>
-  <a href="/cyber/dashboard" class="back-link">← Back to Dashboard</a>
+  <a href="/dashboard" class="back-link">← Back to Dashboard</a>
   <h1>📱 Station QR Codes</h1>
   <p class="subtitle">Print these out — stick them on each PS station for easy customer booking</p>
   <button class="print-btn" onclick="window.print()">🖨️ Print All</button>
@@ -144,7 +144,7 @@
 
   async function loadQRs() {
     try {
-      const res = await fetch(`${API}/api/cyber/playstations`, { cache: 'no-cache' });
+      const res = await fetch(`${API}/api/stations`, { cache: 'no-cache' });
       if (!res.ok) throw new Error('Failed to load');
       const stations = await res.json();
       const grid = document.getElementById('qrGrid');
@@ -154,19 +154,19 @@
         return;
       }
 
-      grid.innerHTML = stations.sort((a, b) => a.playstation_number - b.playstation_number).map(ps => {
-        const bookingUrl = `${BASE_URL}/cyber/ps/${ps.playstation_number}`;
+      grid.innerHTML = stations.sort((a, b) => a.station_number - b.station_number).map(ps => {
+        const bookingUrl = `${BASE_URL}/booking/${ps.station_number}`;
         const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&margin=10&data=${encodeURIComponent(bookingUrl)}`;
         const statusClass = ps.status === 'occupied' ? 'status-occupied' : 'status-available';
         const statusText = ps.status === 'occupied' ? '🔴 IN USE' : '🟢 Available';
         
         return `
           <div class="card">
-            <div class="ps-number">PS ${ps.playstation_number}</div>
+            <div class="ps-number">PS ${ps.station_number}</div>
             <div class="ps-name">${ps.name}</div>
             <span class="status-badge ${statusClass}">${statusText}</span>
             <div class="qr-wrapper">
-              <img src="${qrUrl}" alt="QR for PS ${ps.playstation_number}" loading="lazy">
+              <img src="${qrUrl}" alt="QR for PS ${ps.station_number}" loading="lazy">
             </div>
             <a class="qr-link" href="${bookingUrl}" target="_blank">${bookingUrl}</a>
           </div>

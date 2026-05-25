@@ -21,5 +21,5 @@ CREATE POLICY "Public can update admin_settings" ON admin_settings FOR UPDATE US
 -- Default: changeme
 -- IMPORTANT: Change this after first login!
 INSERT INTO admin_settings (key, value)
-VALUES ('cyber_dashboard_password', 'changeme')
+VALUES ('dashboard_password', 'changeme')
 ON CONFLICT (key) DO NOTHING;

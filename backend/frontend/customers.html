@@ -296,7 +296,7 @@
         </div>
       </div>
       <div style="display:flex;align-items:center;gap:8px;">
-        <a href="/cyber/dashboard" class="back-btn">⬅ Dashboard</a>
+        <a href="/dashboard" class="back-btn">⬅ Dashboard</a>
         <button class="logout-btn" onclick="logout()">Logout</button>
       </div>
     </div>
@@ -345,7 +345,7 @@
     function login() {
       const pw = document.getElementById('passwordInput').value;
       PASSWORD = pw;
-      fetch(`${API}/api/cyber/stats`, {
+      fetch(`${API}/api/stats`, {
           headers: { 'Authorization': `Bearer ${pw}` }
         })
         .then(r => {
@@ -368,7 +368,7 @@
     async function loadCustomers() {
       const tbody = document.getElementById('customersBody');
       try {
-        const res = await fetch(`${API}/api/cyber/customers`, {
+        const res = await fetch(`${API}/api/customers`, {
           headers: { 'Authorization': `Bearer ${PASSWORD}` }
         });
         const data = await res.json();
@@ -383,9 +383,9 @@
           const first = c.first_visit ? new Date(c.first_visit).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: '2-digit' }) : '—';
           const last = c.last_visit ? new Date(c.last_visit).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: '2-digit' }) : '—';
           const cleanPhone = c.phone.replace(/[^0-9]/g, '');
-          const msg = encodeURIComponent(`Hi ${c.name}! 👋 This is Onclock. Special offers available — come play! 🎮 PS${c.favourite_ps || '1-4'} await you.`);
+          const msg = encodeURIComponent(`Hi ${c.name}! 👋 This is Onclock. Special offers available — come play! 🎮 PS${c.favourite_station || '1-4'} await you.`);
           const waUrl = `https://wa.me/91${cleanPhone}?text=${msg}`;
-          const favPs = c.favourite_ps ? `PS ${c.favourite_ps}` : '—';
+          const favPs = c.favourite_station ? `PS ${c.favourite_station}` : '—';
           return `<tr>
             <td class="c-name">${c.name}</td>
             <td class="c-phone">${c.phone}</td>
@@ -413,7 +413,7 @@
     }
 
     function exportCsv() {
-      fetch(`${API}/api/cyber/customers`, {
+      fetch(`${API}/api/customers`, {
         headers: { 'Authorization': `Bearer ${PASSWORD}` }
       })
       .then(r => r.json())
@@ -426,7 +426,7 @@
         data.customers.forEach(c => {
           const first = c.first_visit ? new Date(c.first_visit).toISOString().split('T')[0] : '';
           const last = c.last_visit ? new Date(c.last_visit).toISOString().split('T')[0] : '';
-          rows.push([c.name, c.phone, c.visit_count, c.total_spent, c.favourite_ps ? 'PS'+c.favourite_ps : '', first, last]);
+          rows.push([c.name, c.phone, c.visit_count, c.total_spent, c.favourite_station ? 'PS'+c.favourite_station : '', first, last]);
         });
         const csv = rows.map(r => r.map(v => `"${v}"`).join(',')).join('\n');
         const blob = new Blob([csv], { type: 'text/csv' });

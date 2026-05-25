@@ -22,7 +22,7 @@ self.addEventListener('activate', (e) => {
 self.addEventListener('fetch', (e) => {
   const req = e.request;
   // Don't intercept API, dashboard, or cyber routes — always live.
-  if (req.method !== 'GET' || req.url.includes('/api/') || req.url.includes('/dashboard') || req.url.includes('/cyber')) return;
+  if (req.method !== 'GET' || req.url.includes('/api/') || req.url.includes('/dashboard') || req.url.includes('/')) return;
   e.respondWith(
     fetch(req).catch(() => caches.match(req).then((r) => r || caches.match('/')))
   );

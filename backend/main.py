@@ -22,8 +22,8 @@ from dotenv import load_dotenv
 
 from database import get_db, validate_env
 from models import (
-    CyberSessionStart, CyberSessionEnd, CyberPlayStationCreate,
-    CyberAdvanceBooking
+    SessionStart, SessionEnd, StationCreate,
+    AdvanceBooking
 )
 
 load_dotenv()
@@ -119,7 +119,7 @@ class CacheControlMiddleware(BaseHTTPMiddleware):
             response.headers["Cache-Control"] = "public, max-age=3600, immutable"
         # HTML pages & known routes — short cache with revalidation
         elif (path.endswith(".html")
-              or path in ["/", "/cyber", "/cyber/"]
+              or path in ["/", "/", "/"]
               or "/track" in path
               or "/qr" in path):
             response.headers["Cache-Control"] = "public, max-age=300, must-revalidate"
@@ -133,7 +133,7 @@ app.add_middleware(CacheControlMiddleware)
 BASE_DIR = Path(__file__).parent
 FRONTEND_DIR = BASE_DIR / "frontend"
 
-BUSINESS_NAME = os.getenv("BUSINESS_NAME", "Cyber Cafe")
+BUSINESS_NAME = os.getenv("BUSINESS_NAME", "Station")
 DASHBOARD_PASSWORD = os.getenv("DASHBOARD_PASSWORD", "changeme")
 HOURLY_RATE = float(os.getenv("HOURLY_RATE", "50"))
 
@@ -180,9 +180,9 @@ def parse_timestamp(ts_str):
     return dt.astimezone(timezone.utc)  # Convert to UTC
 
 
-# ─── Cyber Dashboard Auth ────────────────────────────────────────
+# ─── Dashboard Auth ─────────────────────────────────────────────
 
-def get_cyber_password_from_request(
+def get_password_from_request(
     password: str = Query(""),
     authorization: str = Header(None),
 ) -> str:
@@ -193,12 +193,12 @@ def get_cyber_password_from_request(
         return password
     raise HTTPException(status_code=401, detail="Authentication required")
 
-def verify_cyber_dashboard(pw: str = Depends(get_cyber_password_from_request)):
-    """Verify cyber dashboard password."""
+def verify_dashboard(pw: str = Depends(get_password_from_request)):
+    """Verify dashboard password."""
     correct = os.getenv("DASHBOARD_PASSWORD", "changeme")
     try:
         db = get_db()
-        res = db.table("admin_settings").select("value").eq("key", "cyber_dashboard_password").maybe_single().execute()
+        res = db.table("admin_settings").select("value").eq("key", "dashboard_password").maybe_single().execute()
         if res.data and res.data.get("value"):
             correct = res.data["value"]
     except Exception:
@@ -206,62 +206,51 @@ def verify_cyber_dashboard(pw: str = Depends(get_cyber_password_from_request)):
     if not check_password(pw, correct):
         raise HTTPException(status_code=401, detail="Wrong password")
 
-require_cyber = Depends(verify_cyber_dashboard)
+require_auth = Depends(verify_dashboard)
 
 
-# ─── Cyber Frontend Routes ──────────────────────────────────────
+# ─── Frontend Routes ──────────────────────────────────────────
 
-@app.get("/cyber/track")
-async def serve_cyber_track():
-    """Serve the cyber session tracking page."""
-    return FileResponse(FRONTEND_DIR / "cyber-track.html")
-
-
-@app.get("/cyber", response_class=HTMLResponse)
-@app.get("/cyber/", response_class=HTMLResponse, include_in_schema=False)
-async def serve_cyber_index():
-    return FileResponse(FRONTEND_DIR / "index.html")
-
-
-@app.get("/cyber/ps/{ps_number}", response_class=HTMLResponse)
-async def serve_cyber_ps_number(ps_number: str):
-    try:
-        n = int(ps_number)
-        if n < 1 or n > 4:
-            return FileResponse(FRONTEND_DIR / "index.html")
-        return FileResponse(FRONTEND_DIR / "ps-menu.html")
-    except (ValueError, TypeError):
-        return FileResponse(FRONTEND_DIR / "index.html")
-
-
-@app.get("/cyber/dashboard", response_class=HTMLResponse)
-async def serve_cyber_dashboard():
-    return FileResponse(FRONTEND_DIR / "cyber-dashboard.html")
-
-
-@app.get("/cyber/customers", response_class=HTMLResponse)
-async def serve_cyber_customers():
-    return FileResponse(FRONTEND_DIR / "cyber-customers.html")
-
-
-@app.get("/cyber/qr-codes", response_class=HTMLResponse)
-async def serve_cyber_qr_codes():
-    return FileResponse(FRONTEND_DIR / "cyber-qr.html")
-
-
-@app.get("/cyber/qr", response_class=RedirectResponse)
-async def redirect_cyber_qr():
-    return RedirectResponse(url="/cyber/qr-codes")
-
-
-@app.get("/qr", response_class=RedirectResponse)
-async def redirect_qr():
-    return RedirectResponse(url="/cyber/qr-codes")
+@app.get("/track", response_class=HTMLResponse)
+async def serve_track():
+    """Serve the session tracking page."""
+    return FileResponse(FRONTEND_DIR / "track.html")
 
 
 @app.get("/", response_class=HTMLResponse)
 async def serve_index():
     return FileResponse(FRONTEND_DIR / "index.html")
+
+
+@app.get("/booking/{station_number}", response_class=HTMLResponse)
+async def serve_booking(station_number: str):
+    try:
+        n = int(station_number)
+        if n < 1 or n > 4:
+            return FileResponse(FRONTEND_DIR / "index.html")
+        return FileResponse(FRONTEND_DIR / "station-menu.html")
+    except (ValueError, TypeError):
+        return FileResponse(FRONTEND_DIR / "index.html")
+
+
+@app.get("/dashboard", response_class=HTMLResponse)
+async def serve_dashboard():
+    return FileResponse(FRONTEND_DIR / "dashboard.html")
+
+
+@app.get("/customers", response_class=HTMLResponse)
+async def serve_customers():
+    return FileResponse(FRONTEND_DIR / "customers.html")
+
+
+@app.get("/qr-codes", response_class=HTMLResponse)
+async def serve_qr_codes():
+    return FileResponse(FRONTEND_DIR / "qr.html")
+
+
+@app.get("/qr", response_class=RedirectResponse)
+async def redirect_qr():
+    return RedirectResponse(url="/qr-codes")
 
 
 @app.get("/onclock-logo.jpg")
@@ -281,95 +270,95 @@ async def upi_qr():
 
 
 # ═══════════════════════════════════════════════════════════════════════
-# CYBER CAFE ENDPOINTS
+# STATION ENDPOINTS
 # ═══════════════════════════════════════════════════════════════════════
 
 
-@app.get("/api/cyber/playstations")
-async def list_playstations():
-    """List all active playstations with current session info."""
+@app.get("/api/stations")
+async def list_stations():
+    """List all active stations with current session info."""
     _auto_expire_sessions()
     db = get_db()
-    ps_list = db.table("playstations").select("*").eq("is_active", True).order("playstation_number").execute()
+    stations_list = db.table("stations").select("*").eq("is_active", True).order("station_number").execute()
 
     # Batch-load all active sessions to avoid N+1
-    ps_ids = [ps["id"] for ps in (ps_list.data or [])]
+    station_ids = [s["id"] for s in (stations_list.data or [])]
     sessions_map = {}
-    if ps_ids:
-        all_active = db.table("sessions").select("*").eq("status", "active").in_("playstation_id", ps_ids).execute()
+    if station_ids:
+        all_active = db.table("sessions").select("*").eq("status", "active").in_("station_id", station_ids).execute()
         for s in (all_active.data or []):
-            sessions_map[s["playstation_id"]] = s
+            sessions_map[s["station_id"]] = s
 
     result = []
-    for ps in (ps_list.data or []):
-        session = sessions_map.get(ps["id"])
-        ps["current_session"] = session
-        ps["status"] = "occupied" if session else "available"
-        result.append(ps)
+    for s in (stations_list.data or []):
+        session = sessions_map.get(s["id"])
+        s["current_session"] = session
+        s["status"] = "occupied" if session else "available"
+        result.append(s)
 
     return result
 
 
-@app.post("/api/cyber/playstations")
-async def create_playstation(ps: CyberPlayStationCreate, _: None = Depends(verify_cyber_dashboard)):
-    """Create a new playstation."""
+@app.post("/api/stations")
+async def create_station(ps: StationCreate, _: None = Depends(verify_dashboard)):
+    """Create a new station."""
     db = get_db()
     data = ps.model_dump()
     data["status"] = "available"
     data["is_active"] = True
-    result = db.table("playstations").insert(data).execute()
+    result = db.table("stations").insert(data).execute()
     return result.data[0]
 
 
-@app.put("/api/cyber/playstations/{ps_id}")
-async def update_playstation(ps_id: int, ps: CyberPlayStationCreate, _: None = Depends(verify_cyber_dashboard)):
-    """Update a playstation."""
+@app.put("/api/stations/{station_id}")
+async def update_station(station_id: int, ps: StationCreate, _: None = Depends(verify_dashboard)):
+    """Update a station."""
     db = get_db()
-    result = db.table("playstations").update(ps.model_dump()).eq("id", ps_id).execute()
+    result = db.table("stations").update(ps.model_dump()).eq("id", station_id).execute()
     if not result.data:
-        raise HTTPException(status_code=404, detail="PlayStation not found")
+        raise HTTPException(status_code=404, detail="Station not found")
     return result.data[0]
 
 
-@app.delete("/api/cyber/playstations/{ps_id}")
-async def delete_playstation(ps_id: int, _: None = Depends(verify_cyber_dashboard)):
-    """Soft delete a playstation."""
+@app.delete("/api/stations/{station_id}")
+async def delete_station(station_id: int, _: None = Depends(verify_dashboard)):
+    """Soft delete a station."""
     db = get_db()
-    db.table("playstations").update({"is_active": False}).eq("id", ps_id).execute()
+    db.table("stations").update({"is_active": False}).eq("id", station_id).execute()
     return {"ok": True}
 
 
-@app.get("/api/cyber/playstations/{ps_id}/status")
-async def get_ps_status(ps_id: int):
-    """Get status of a specific playstation."""
+@app.get("/api/stations/{station_id}/status")
+async def get_station_status(station_id: int):
+    """Get status of a specific station."""
     db = get_db()
-    ps = db.table("playstations").select("*").eq("id", ps_id).execute()
-    if not ps.data:
-        raise HTTPException(status_code=404, detail="PlayStation not found")
+    station = db.table("stations").select("*").eq("id", station_id).execute()
+    if not station.data:
+        raise HTTPException(status_code=404, detail="Station not found")
 
-    session = db.table("sessions").select("*").eq("playstation_id", ps_id).eq("status", "active").execute()
+    session = db.table("sessions").select("*").eq("station_id", station_id).eq("status", "active").execute()
     return {
-        "playstation": ps.data[0],
+        "station": station.data[0],
         "session": session.data[0] if session.data else None
     }
 
 
-# ─── Cyber Session Endpoints ───────────────────────────────────────
+# ─── Session Endpoints ───────────────────────────────────────
 
-@app.post("/api/cyber/sessions/start")
-async def start_session(session: CyberSessionStart):
-    """Customer starts a gaming session."""
+@app.post("/api/sessions/start")
+async def start_session(session: SessionStart):
+    """Customer starts a session."""
     db = get_db()
 
-    ps = db.table("playstations").select("*").eq("id", session.playstation_id).execute()
-    if not ps.data:
-        raise HTTPException(status_code=404, detail="PlayStation not found")
+    station = db.table("stations").select("*").eq("id", session.station_id).execute()
+    if not station.data:
+        raise HTTPException(status_code=404, detail="Station not found")
 
-    if ps.data[0]["status"] == "occupied":
-        raise HTTPException(status_code=400, detail="PlayStation is currently in use")
+    if station.data[0]["status"] == "occupied":
+        raise HTTPException(status_code=400, detail="Station is currently in use")
 
     hours = float(session.hours)
-    rate = ps.data[0]["hourly_rate"]
+    rate = station.data[0]["hourly_rate"]
     num_players = max(1, session.num_players or 1)
     effective_rate = rate if num_players <= 1 else 125 * num_players
     total = hours * effective_rate
@@ -384,7 +373,7 @@ async def start_session(session: CyberSessionStart):
     )
 
     session_data = {
-        "playstation_id": session.playstation_id,
+        "station_id": session.station_id,
         "player_name": session.player_name,
         "player_phone": session.player_phone,
         "num_players": session.num_players or 1,
@@ -401,31 +390,31 @@ async def start_session(session: CyberSessionStart):
     if not result.data:
         raise HTTPException(status_code=400, detail="Failed to start session")
 
-    db.table("playstations").update({"status": "occupied"}).eq("id", session.playstation_id).execute()
+    db.table("stations").update({"status": "occupied"}).eq("id", session.station_id).execute()
 
     return {"ok": True, "session_id": result.data[0]["id"], "total": total}
 
 
-@app.post("/api/cyber/sessions/dashboard-start")
+@app.post("/api/sessions/dashboard-start")
 async def dashboard_start_session(
-    playstation_id: int = Body(...),
+    station_id: int = Body(...),
     player_name: str = Body(default="Guest"),
     player_phone: str = Body(default=""),
     num_players: int = Body(default=1),
     hours: float = Body(...),
-    _: None = Depends(verify_cyber_dashboard)
+    _: None = Depends(verify_dashboard)
 ):
     """Owner starts a session from the dashboard."""
     db = get_db()
 
-    ps = db.table("playstations").select("*").eq("id", playstation_id).execute()
-    if not ps.data:
-        raise HTTPException(status_code=404, detail="PlayStation not found")
+    station = db.table("stations").select("*").eq("id", station_id).execute()
+    if not station.data:
+        raise HTTPException(status_code=404, detail="Station not found")
 
-    if ps.data[0]["status"] == "occupied":
-        raise HTTPException(status_code=400, detail="PlayStation is currently in use")
+    if station.data[0]["status"] == "occupied":
+        raise HTTPException(status_code=400, detail="Station is currently in use")
 
-    rate = ps.data[0]["hourly_rate"]
+    rate = station.data[0]["hourly_rate"]
     effective_rate = rate if num_players <= 1 else 125 * num_players
     total = hours * effective_rate
 
@@ -439,7 +428,7 @@ async def dashboard_start_session(
     )
 
     session_data = {
-        "playstation_id": playstation_id,
+        "station_id": station_id,
         "player_name": player_name,
         "player_phone": player_phone,
         "num_players": max(1, num_players),
@@ -456,40 +445,40 @@ async def dashboard_start_session(
     if not result.data:
         raise HTTPException(status_code=400, detail="Failed to start session")
 
-    db.table("playstations").update({"status": "occupied"}).eq("id", playstation_id).execute()
+    db.table("stations").update({"status": "occupied"}).eq("id", station_id).execute()
 
     return {"ok": True, "session_id": result.data[0]["id"], "total": total, "player_name": player_name}
 
 
-@app.get("/api/cyber/sessions")
-async def get_sessions(completed: bool = Query(False), _: None = Depends(verify_cyber_dashboard)):
+@app.get("/api/sessions")
+async def get_sessions(completed: bool = Query(False), _: None = Depends(verify_dashboard)):
     """Get all sessions (owner only). Auto-expires overdue sessions first.
     Use ?completed=true to get only completed sessions sorted by end_time.
     """
     db = get_db()
     _auto_expire_sessions()
     if completed:
-        result = db.table("sessions").select("*,playstations(playstation_number,name)").neq("status", "active").order("end_time", desc=True).limit(20).execute()
+        result = db.table("sessions").select("*,stations(station_number,name)").neq("status", "active").order("end_time", desc=True).limit(20).execute()
     else:
-        result = db.table("sessions").select("*,playstations(playstation_number,name)").order("start_time", desc=True).limit(50).execute()
+        result = db.table("sessions").select("*,stations(station_number,name)").order("start_time", desc=True).limit(50).execute()
     return result.data or []
 
 
-@app.get("/api/cyber/sessions/active")
-async def get_active_sessions(_: None = Depends(verify_cyber_dashboard)):
+@app.get("/api/sessions/active")
+async def get_active_sessions(_: None = Depends(verify_dashboard)):
     """Get all active sessions (authenticated)."""
     db = get_db()
-    result = db.table("sessions").select("*,playstations(playstation_number,name)").eq("status", "active").execute()
+    result = db.table("sessions").select("*,stations(station_number,name)").eq("status", "active").execute()
     return result.data or []
 
 
-@app.get("/api/cyber/sessions/check-expired")
+@app.get("/api/sessions/check-expired")
 async def check_expired():
     """Check and mark expired sessions. Returns newly expired session IDs."""
     db = get_db()
     now = datetime.now(timezone.utc).isoformat()
 
-    expired = db.table("sessions").select("id,playstation_id,player_name,total_amount").eq("status", "active").execute()
+    expired = db.table("sessions").select("id,station_id,player_name,total_amount").eq("status", "active").execute()
     newly_expired = []
 
     for s in (expired.data or []):
@@ -505,7 +494,7 @@ async def check_expired():
             "status": "completed",
             "end_reason": "Auto-expired: time limit reached"
         }).eq("id", s["id"]).execute()
-        db.table("playstations").update({"status": "available"}).eq("id", s["playstation_id"]).execute()
+        db.table("stations").update({"status": "available"}).eq("id", s["station_id"]).execute()
 
     return {"expired": newly_expired}
 
@@ -513,7 +502,7 @@ async def check_expired():
 def _auto_expire_sessions():
     """Check and mark expired sessions. Call before any status read."""
     db = get_db()
-    expired = db.table("sessions").select("id,playstation_id,end_time").eq("status", "active").execute()
+    expired = db.table("sessions").select("id,station_id,end_time").eq("status", "active").execute()
     now = datetime.now(timezone.utc)
     for s in (expired.data or []):
         end_time = s.get("end_time", "")
@@ -524,22 +513,22 @@ def _auto_expire_sessions():
                     "status": "completed",
                     "end_reason": "Auto-expired: time limit reached"
                 }).eq("id", s["id"]).execute()
-                db.table("playstations").update({"status": "available"}).eq("id", s["playstation_id"]).execute()
+                db.table("stations").update({"status": "available"}).eq("id", s["station_id"]).execute()
 
 
 # ─── Advance Booking (Prepaid) ──────────────────────────────────
 
-@app.post("/api/cyber/sessions/book")
-async def create_advance_booking(booking: CyberAdvanceBooking):
+@app.post("/api/sessions/book")
+async def create_advance_booking(booking: AdvanceBooking):
     """Customer books a session in advance with prepaid payment.
     Creates a pending booking — owner confirms after payment screenshot is verified.
     """
     db = get_db()
 
-    # Validate playstation
-    ps = db.table("playstations").select("*").eq("id", booking.playstation_id).execute()
-    if not ps.data:
-        raise HTTPException(status_code=404, detail="PlayStation not found")
+    # Validate station
+    station = db.table("stations").select("*").eq("id", booking.station_id).execute()
+    if not station.data:
+        raise HTTPException(status_code=404, detail="Station not found")
 
     # Validate scheduled time is in the future
     try:
@@ -556,7 +545,7 @@ async def create_advance_booking(booking: CyberAdvanceBooking):
     req_start = scheduled
     req_end = scheduled + timedelta(hours=hours) + timedelta(minutes=5)  # 5 min buffer
 
-    existing = db.table("sessions").select("id,start_time,end_time,status,player_name").in_("status", ["pending", "confirmed", "active"]).eq("playstation_id", booking.playstation_id).execute()
+    existing = db.table("sessions").select("id,start_time,end_time,status,player_name").in_("status", ["pending", "confirmed", "active"]).eq("station_id", booking.station_id).execute()
     for s in (existing.data or []):
         s_start = parse_timestamp(s.get("start_time"))
         s_end = parse_timestamp(s.get("end_time"))
@@ -569,7 +558,7 @@ async def create_advance_booking(booking: CyberAdvanceBooking):
                            f"Please choose a different time."
                 )
 
-    rate = ps.data[0]["hourly_rate"]
+    rate = station.data[0]["hourly_rate"]
     num_players = max(1, booking.num_players or 1)
     effective_rate = rate if num_players <= 1 else 125 * num_players
     total = round(hours * effective_rate, 2)
@@ -581,7 +570,7 @@ async def create_advance_booking(booking: CyberAdvanceBooking):
         return dt.isoformat() + "+00:00"
 
     session_data = {
-        "playstation_id": booking.playstation_id,
+        "station_id": booking.station_id,
         "player_name": booking.player_name,
         "player_phone": booking.player_phone,
         "num_players": num_players,
@@ -608,16 +597,16 @@ async def create_advance_booking(booking: CyberAdvanceBooking):
     }
 
 
-@app.get("/api/cyber/sessions/pending")
-async def get_pending_bookings(_: None = Depends(verify_cyber_dashboard)):
+@app.get("/api/sessions/pending")
+async def get_pending_bookings(_: None = Depends(verify_dashboard)):
     """Get all pending advance bookings (authenticated)."""
     db = get_db()
-    result = db.table("sessions").select("*,playstations(playstation_number,name)").eq("status", "pending").order("start_time", desc=False).execute()
+    result = db.table("sessions").select("*,stations(station_number,name)").eq("status", "pending").order("start_time", desc=False).execute()
     return result.data or []
 
 
-@app.patch("/api/cyber/sessions/{session_id}/confirm")
-async def confirm_booking(session_id: int, _: None = Depends(verify_cyber_dashboard)):
+@app.patch("/api/sessions/{session_id}/confirm")
+async def confirm_booking(session_id: int, _: None = Depends(verify_dashboard)):
     """Owner confirms an advance booking after verifying payment screenshot."""
     db = get_db()
 
@@ -642,8 +631,8 @@ async def confirm_booking(session_id: int, _: None = Depends(verify_cyber_dashbo
     }
 
 
-@app.patch("/api/cyber/sessions/{session_id}/cancel")
-async def cancel_booking(session_id: int, _: None = Depends(verify_cyber_dashboard)):
+@app.patch("/api/sessions/{session_id}/cancel")
+async def cancel_booking(session_id: int, _: None = Depends(verify_dashboard)):
     """Owner cancels a pending booking."""
     db = get_db()
 
@@ -662,12 +651,12 @@ async def cancel_booking(session_id: int, _: None = Depends(verify_cyber_dashboa
     return {"ok": True, "session_id": session_id, "status": "cancelled"}
 
 
-@app.get("/api/cyber/sessions/{session_id}")
-async def get_cyber_session(session_id: int):
+@app.get("/api/sessions/{session_id}")
+async def get_session(session_id: int):
     """Public: Get session details for tracking timer."""
     _auto_expire_sessions()
     db = get_db()
-    result = db.table("sessions").select("*,playstations(playstation_number,name)").eq("id", session_id).execute()
+    result = db.table("sessions").select("*,stations(station_number,name)").eq("id", session_id).execute()
     if not result.data:
         raise HTTPException(status_code=404, detail="Session not found")
 
@@ -691,8 +680,8 @@ async def get_cyber_session(session_id: int):
         "ok": True,
         "session": {
             "id": session["id"],
-            "playstation_number": session.get("playstations", {}).get("playstation_number") if isinstance(session.get("playstations"), dict) else session.get("playstation_number"),
-            "playstation_name": session.get("playstations", {}).get("name") if isinstance(session.get("playstations"), dict) else None,
+            "station_number": session.get("stations", {}).get("station_number") if isinstance(session.get("stations"), dict) else session.get("station_number"),
+            "station_name": session.get("stations", {}).get("name") if isinstance(session.get("stations"), dict) else None,
             "player_name": session.get("player_name", "Guest"),
             "num_players": session.get("num_players", 1),
             "start_time": session.get("start_time", ""),
@@ -707,8 +696,8 @@ async def get_cyber_session(session_id: int):
     }
 
 
-@app.patch("/api/cyber/sessions/{session_id}/end")
-async def end_session(session_id: int, update: CyberSessionEnd, _: None = Depends(verify_cyber_dashboard)):
+@app.patch("/api/sessions/{session_id}/end")
+async def end_session(session_id: int, update: SessionEnd, _: None = Depends(verify_dashboard)):
     """End a session."""
     db = get_db()
 
@@ -731,7 +720,7 @@ async def end_session(session_id: int, update: CyberSessionEnd, _: None = Depend
         "end_reason": update.end_reason or ""
     }).eq("id", session_id).execute()
 
-    db.table("playstations").update({"status": "available"}).eq("id", sess["playstation_id"]).execute()
+    db.table("stations").update({"status": "available"}).eq("id", sess["station_id"]).execute()
 
     return {"ok": True, "actual_hours": booked_hours, "total": total_amount}
 
@@ -764,17 +753,17 @@ def build_player_entry(name: str, phone: str, hours: float, rate_per_hour: float
     }
 
 
-@app.post("/api/cyber/sessions/{session_id}/extend")
+@app.post("/api/sessions/{session_id}/extend")
 async def extend_session(session_id: int, extend: SessionExtend):
     """Extend an active session by adding hours."""
     db = get_db()
 
-    session = db.table("sessions").select("*,playstations(hourly_rate)").eq("id", session_id).eq("status", "active").execute()
+    session = db.table("sessions").select("*,stations(hourly_rate)").eq("id", session_id).eq("status", "active").execute()
     if not session.data:
         raise HTTPException(status_code=404, detail="Active session not found")
 
     sess = session.data[0]
-    rate = sess["playstations"]["hourly_rate"] if isinstance(sess["playstations"], dict) else sess["rate_per_hour"]
+    rate = sess["stations"]["hourly_rate"] if isinstance(sess["stations"], dict) else sess["rate_per_hour"]
     num_p = max(1, int(sess.get("num_players", 1)))
     eff_rate = float(rate) if num_p <= 1 else 125 * num_p
     extra_amount = round(float(extend.hours) * eff_rate, 2)
@@ -797,7 +786,7 @@ async def extend_session(session_id: int, extend: SessionExtend):
     return {"ok": True, "new_end_time": new_end.isoformat(), "added_hours": extend.hours, "extra_charge": extra_amount}
 
 
-@app.post("/api/cyber/sessions/{session_id}/add-player")
+@app.post("/api/sessions/{session_id}/add-player")
 async def add_player_to_session(session_id: int, player: AddPlayerRequest):
     """Add a new player to an active session with per-player build calculation.
 
@@ -806,7 +795,7 @@ async def add_player_to_session(session_id: int, player: AddPlayerRequest):
     """
     db = get_db()
 
-    session = db.table("sessions").select("*,playstations(hourly_rate)").eq("id", session_id).eq("status", "active").execute()
+    session = db.table("sessions").select("*,stations(hourly_rate)").eq("id", session_id).eq("status", "active").execute()
     if not session.data:
         raise HTTPException(status_code=404, detail="Active session not found")
 
@@ -816,7 +805,7 @@ async def add_player_to_session(session_id: int, player: AddPlayerRequest):
     now = datetime.now(timezone.utc)
 
     # Calculate new player's rate
-    base_rate = sess["playstations"]["hourly_rate"] if isinstance(sess["playstations"], dict) else sess["rate_per_hour"]
+    base_rate = sess["stations"]["hourly_rate"] if isinstance(sess["stations"], dict) else sess["rate_per_hour"]
     # Group rate applies if total players will be 2+
     new_player_rate = 125 if new_players >= 2 else float(base_rate)
 
@@ -874,12 +863,12 @@ async def add_player_to_session(session_id: int, player: AddPlayerRequest):
     }
 
 
-@app.get("/api/cyber/stats")
-async def get_cyber_stats(_: None = Depends(verify_cyber_dashboard)):
-    """Get cafe statistics."""
+@app.get("/api/stats")
+async def get_stats(_: None = Depends(verify_dashboard)):
+    """Get station statistics."""
     db = get_db()
 
-    playstations = db.table("playstations").select("*").eq("is_active", True).execute()
+    stations = db.table("stations").select("*").eq("is_active", True).execute()
     all_sessions = db.table("sessions").select("*").execute()
     active = db.table("sessions").select("*").eq("status", "active").execute()
 
@@ -890,9 +879,9 @@ async def get_cyber_stats(_: None = Depends(verify_cyber_dashboard)):
     amount_to_collect = round(sum(float(s.get("total_amount", 0)) for s in (active.data or [])), 2)
 
     return {
-        "total_ps": len(playstations.data or []),
-        "available": len([p for p in (playstations.data or []) if p["status"] == "available"]),
-        "occupied": len([p for p in (playstations.data or []) if p["status"] == "occupied"]),
+        "total_stations": len(stations.data or []),
+        "available": len([p for p in (stations.data or []) if p["status"] == "available"]),
+        "occupied": len([p for p in (stations.data or []) if p["status"] == "occupied"]),
         "active_sessions": len(active.data or []),
         "revenue_today": sum(float(s.get("total_amount", 0)) for s in today_sessions),
         "all_time_revenue": sum(float(s.get("total_amount", 0)) for s in (all_sessions.data or [])),
@@ -900,8 +889,8 @@ async def get_cyber_stats(_: None = Depends(verify_cyber_dashboard)):
     }
 
 
-@app.get("/api/cyber/customers")
-async def get_cyber_customers(_: None = Depends(verify_cyber_dashboard)):
+@app.get("/api/customers")
+async def get_customers(_: None = Depends(verify_dashboard)):
     """Get customer database for marketing — deduplicated by phone, with visit history & spend."""
     db = get_db()
     all_sessions = db.table("sessions").select("*").neq("player_phone", "").not_.is_("player_phone", "null").execute()
@@ -922,7 +911,7 @@ async def get_cyber_customers(_: None = Depends(verify_cyber_dashboard)):
                 "total_spent": 0.0,
                 "first_visit": None,
                 "last_visit": None,
-                "favourite_ps": {},
+                "favourite_station": {},
                 "statuses": {"active": 0, "completed": 0, "cancelled": 0},
             }
         c = customers[phone]
@@ -934,9 +923,9 @@ async def get_cyber_customers(_: None = Depends(verify_cyber_dashboard)):
                 c["first_visit"] = t
             if not c["last_visit"] or t > c["last_visit"]:
                 c["last_visit"] = t
-        ps = s.get("playstation_id")
-        if ps:
-            c["favourite_ps"][str(ps)] = c["favourite_ps"].get(str(ps), 0) + 1
+        station = s.get("station_id")
+        if station:
+            c["favourite_station"][str(station)] = c["favourite_station"].get(str(station), 0) + 1
         st = s.get("status", "")
         if st in c["statuses"]:
             c["statuses"][st] += 1
@@ -944,10 +933,10 @@ async def get_cyber_customers(_: None = Depends(verify_cyber_dashboard)):
         if name and name != "Guest":
             c["name"] = name
 
-    # Compute favourite ps number, sort by last_visit desc
+    # Compute favourite station number, sort by last_visit desc
     result = []
     for phone, c in customers.items():
-        fav_ps = max(c["favourite_ps"], key=c["favourite_ps"].get) if c["favourite_ps"] else None
+        fav_station = max(c["favourite_station"], key=c["favourite_station"].get) if c["favourite_station"] else None
         result.append({
             "phone": c["phone"],
             "name": c["name"],
@@ -955,7 +944,7 @@ async def get_cyber_customers(_: None = Depends(verify_cyber_dashboard)):
             "total_spent": round(c["total_spent"], 0),
             "first_visit": c["first_visit"],
             "last_visit": c["last_visit"],
-            "favourite_ps": int(fav_ps) if fav_ps else None,
+            "favourite_station": int(fav_station) if fav_station else None,
             "completed": c["statuses"]["completed"],
             "cancelled": c["statuses"]["cancelled"],
         })
@@ -968,12 +957,12 @@ async def get_cyber_customers(_: None = Depends(verify_cyber_dashboard)):
 
 
 # ═══════════════════════════════════════════════════════════════════════
-# CHANGE PASSWORD (Cyber only)
+# CHANGE PASSWORD
 # ═══════════════════════════════════════════════════════════════════════
 
 @app.post("/api/change-password")
 async def change_password(body: PasswordChange):
-    """Change cyber dashboard password."""
+    """Change dashboard password."""
     if body.new_password != body.confirm_password:
         raise HTTPException(status_code=400, detail="Passwords do not match")
     if len(body.new_password) < 4:
@@ -982,7 +971,7 @@ async def change_password(body: PasswordChange):
     correct = os.getenv("DASHBOARD_PASSWORD", "changeme")
     try:
         db = get_db()
-        r = db.table("admin_settings").select("value").eq("key", "cyber_dashboard_password").maybe_single().execute()
+        r = db.table("admin_settings").select("value").eq("key", "dashboard_password").maybe_single().execute()
         if r.data and r.data.get("value"):
             correct = r.data["value"]
     except Exception:
@@ -994,11 +983,11 @@ async def change_password(body: PasswordChange):
     hashed = hash_password(body.new_password)
     try:
         db = get_db()
-        db.table("admin_settings").upsert({"key": "cyber_dashboard_password", "value": hashed}, on_conflict="key").execute()
+        db.table("admin_settings").upsert({"key": "dashboard_password", "value": hashed}, on_conflict="key").execute()
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to save password: {e}. Please ensure admin_settings table exists in Supabase.")
 
-    return {"success": True, "dashboard": "cyber", "message": "Dashboard password updated successfully"}
+    return {"success": True, "message": "Dashboard password updated successfully"}
 
 
 # ─── Run ────────────────────────────────────────────────────────────

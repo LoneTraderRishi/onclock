@@ -135,7 +135,7 @@
     <div class="empty-state" id="emptyState" style="display:none;"><div class="emoji">🎮</div><p>No session ID provided</p><p style="font-size:14px;margin-top:8px;color:var(--text-soft);">Book a station first, then use the tracking link from your booking.</p></div>
 
     <div class="timer-card" id="timerCard" style="display:none;">
-      <div class="ps-label">PlayStation</div>
+      <div class="ps-label">Station</div>
       <div class="ps-number" id="psNumber">--</div>
 
       <div class="timer-display" id="activeTimer">
@@ -160,7 +160,7 @@
       </div>
 
       <div class="toolbar">
-        <a class="btn-secondary" href="/cyber/">← All Stations</a>
+        <a class="btn-secondary" href="/">← All Stations</a>
         <button class="btn-secondary" onclick="location.reload()">🔄 Refresh</button>
       </div>
 
@@ -211,7 +211,7 @@
 
     async function loadSession() {
       try {
-        const res = await fetch(`${API}/api/cyber/sessions/${sessionId}`, { cache: 'no-cache' });
+        const res = await fetch(`${API}/api/sessions/${sessionId}`, { cache: 'no-cache' });
         if (!res.ok) throw new Error('Not found');
         const data = await res.json();
         if (!data.ok || !data.session) throw new Error('Invalid');
@@ -236,7 +236,7 @@
 
     async function syncSession() {
       try {
-        const res = await fetch(`${API}/api/cyber/sessions/${sessionId}`, { cache: 'no-cache' });
+        const res = await fetch(`${API}/api/sessions/${sessionId}`, { cache: 'no-cache' });
         if (!res.ok) return;
         const data = await res.json();
         if (!data.ok) return;
@@ -248,7 +248,7 @@
 
     function renderSession(data) {
       const s = data.session;
-      document.getElementById('psNumber').textContent = s.playstation_number || '--';
+      document.getElementById('psNumber').textContent = s.station_number || '--';
       document.getElementById('playerName').textContent = s.player_name || 'Guest';
       document.getElementById('numPlayers').textContent = s.num_players || 1;
       if (s.start_time) {

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PlayStation - Onclock</title>
+  <title>Station - Onclock</title>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -353,9 +353,9 @@
 </head>
 <body>
   <div class="header">
-    <a href="/cyber/" class="back-link">← Back to Stations</a>
+    <a href="/" class="back-link">← Back to Stations</a>
     <img src="/onclock-logo.jpg" alt="Onclock" style="height:50px;width:auto;margin-bottom:10px;border-radius:10px;">
-    <div class="ps-label">PlayStation</div>
+    <div class="ps-label">Station</div>
     <div class="ps-number" id="psNumber">--</div>
     <div style="font-size:10px;color:rgba(255,255,255,0.5);margin-top:8px;">
       <a href="#" style="color:rgba(255,255,255,0.5);text-decoration:none;">your-business.in</a>
@@ -496,13 +496,13 @@
     async function loadStation(retries = 2) {
       for (let attempt = 0; attempt <= retries; attempt++) {
         try {
-          const res = await fetch(`${API}/api/cyber/playstations`, {
+          const res = await fetch(`${API}/api/stations`, {
             headers: { 'Cache-Control': 'no-cache' },
             cache: 'no-cache'
           });
           if (!res.ok) throw new Error(`HTTP ${res.status}`);
           const stations = await res.json();
-          const station = stations.find(s => s.playstation_number === psNumber);
+          const station = stations.find(s => s.station_number === psNumber);
 
           if (!station) {
             document.getElementById('content').innerHTML = '<p style="text-align:center;padding:40px;">Station not found</p>';
@@ -532,7 +532,7 @@
         🔄 Retry
       </button>
       <br><br>
-      <a href="/cyber/" style="color:var(--text-soft);text-decoration:none;font-size:14px;">← Back to Stations</a>
+      <a href="/" style="color:var(--text-soft);text-decoration:none;font-size:14px;">← Back to Stations</a>
     </div>
   `;
           }
@@ -690,7 +690,7 @@
       const sid = window.currentSession?.id;
       if (!sid) { alert('Session not found'); return; }
       try {
-        const res = await fetch(`${API}/api/cyber/sessions/${sid}/extend`, {
+        const res = await fetch(`${API}/api/sessions/${sid}/extend`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ player_name: name, player_phone: phone, hours: hours })
@@ -789,11 +789,11 @@
     
     async function startSession(name, phone) {
       try {
-        const res = await fetch(`${API}/api/cyber/sessions/start`, {
+        const res = await fetch(`${API}/api/sessions/start`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            playstation_id: psId,
+            station_id: psId,
             player_name: name,
             player_phone: phone,
             num_players: selectedPlayers,
@@ -816,12 +816,12 @@
           });
           localStorage.setItem('active_sessions', JSON.stringify(filtered));
 
-          const trackingUrl = `${window.location.origin}/cyber/track?session=${data.session_id}`;
+          const trackingUrl = `${window.location.origin}/track?session=${data.session_id}`;
           const waLink = `https://wa.me/?text=${encodeURIComponent('🎮 PS ' + psNumber + ' session active!\nTrack your time: ' + trackingUrl)}`;
 
-          const res2 = await fetch(`${API}/api/cyber/playstations`, { cache: 'no-cache' });
+          const res2 = await fetch(`${API}/api/stations`, { cache: 'no-cache' });
           const stations = await res2.json();
-          const station = stations.find(s => s.playstation_number === psNumber);
+          const station = stations.find(s => s.station_number === psNumber);
           if (station && station.status === 'occupied' && station.current_session) {
             window.currentSession = station.current_session;
             renderOccupied(station.current_session);
@@ -903,11 +903,11 @@
       btn.textContent = 'Booking…';
       
       try {
-        const res = await fetch(`${API}/api/cyber/sessions/book`, {
+        const res = await fetch(`${API}/api/sessions/book`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            playstation_id: psId,
+            station_id: psId,
             player_name: name,
             player_phone: phone,
             num_players: selectedPlayers,
@@ -998,9 +998,9 @@
         if (!cached || isOccupied) return;
 
         // Validate against server
-        const res = await fetch(`${API}/api/cyber/playstations`, { cache: 'no-cache' });
+        const res = await fetch(`${API}/api/stations`, { cache: 'no-cache' });
         const stations = await res.json();
-        const station = stations.find(s => s.playstation_number === psNumber);
+        const station = stations.find(s => s.station_number === psNumber);
 
         if (station && station.status === 'available') {
           // Session is not actually active on server — clean up localStorage
@@ -1012,7 +1012,7 @@
         // Server confirms it's occupied, or we can't tell — show banner based on local time
         const elapsed = (Date.now() - new Date(cached.started_at).getTime()) / 3600000;
         if (elapsed < cached.hours) {
-          const trackUrl = `${window.location.origin}/cyber/track?session=${cached.session_id}`;
+          const trackUrl = `${window.location.origin}/track?session=${cached.session_id}`;
           const banner = document.createElement('div');
           banner.style.cssText = 'background:var(--card);border:1px solid var(--accent);border-radius:16px;padding:16px;margin-bottom:20px;text-align:center;';
           banner.innerHTML = `
@@ -1035,7 +1035,7 @@
     setInterval(async () => {
       if (!isOccupied) return;
       try {
-        const res = await fetch(`${API}/api/cyber/sessions/check-expired`, { cache: 'no-cache' });
+        const res = await fetch(`${API}/api/sessions/check-expired`, { cache: 'no-cache' });
         const data = await res.json();
         if (data.expired && data.expired.length > 0) {
           const currentExpired = data.expired.find(s => s.id === window.currentSession?.id);
@@ -1057,15 +1057,15 @@
               </div>
               <p style="text-align:center;padding:30px 0 10px;color:var(--text-soft);">Your session has ended. Please pay ₹${Math.round(total)} using the options below:</p>
               ${upiPaySection(Math.round(total))}
-              <a href="/cyber/" style="display:block;text-align:center;padding:15px;background:var(--primary);color:white;text-decoration:none;border-radius:12px;margin-top:15px;">Back to Stations</a>
+              <a href="/" style="display:block;text-align:center;padding:15px;background:var(--primary);color:white;text-decoration:none;border-radius:12px;margin-top:15px;">Back to Stations</a>
             `;
             isOccupied = false;
             return;
           }
         }
-        const res2 = await fetch(`${API}/api/cyber/playstations`, { cache: 'no-cache' });
+        const res2 = await fetch(`${API}/api/stations`, { cache: 'no-cache' });
         const stations = await res2.json();
-        const station = stations.find(s => s.playstation_number === psNumber);
+        const station = stations.find(s => s.station_number === psNumber);
         if (station && station.status === 'available' && !station.current_session) {
           clearInterval(window.countdownInterval);
           const hours = window.currentSession?.hours_booked || 0;
@@ -1093,7 +1093,7 @@
               <p style="font-size:14px;color:var(--text-soft);margin-top:20px;">Please pay ₹${Math.round(total)} using the options below:</p>
               ${upiPaySection(Math.round(total))}
             </div>
-            <a href="/cyber/" style="display:block;text-align:center;padding:15px;background:var(--primary);color:white;text-decoration:none;border-radius:12px;margin:15px;">Play Again</a>
+            <a href="/" style="display:block;text-align:center;padding:15px;background:var(--primary);color:white;text-decoration:none;border-radius:12px;margin:15px;">Play Again</a>
           `;
           isOccupied = false;
         }

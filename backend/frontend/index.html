@@ -159,7 +159,7 @@
     
     async function loadStations() {
       try {
-        const res = await fetch(`${API}/api/cyber/playstations`, { cache: 'no-cache' });
+        const res = await fetch(`${API}/api/stations`, { cache: 'no-cache' });
         if (!res.ok) throw new Error('Server error');
         const stations = await res.json();
         renderStations(stations);
@@ -180,12 +180,12 @@
     function renderStations(stations) {
       const grid = document.getElementById('psGrid');
       grid.innerHTML = stations
-        .sort((a, b) => a.playstation_number - b.playstation_number)
+        .sort((a, b) => a.station_number - b.station_number)
         .map(ps => {
         const isAvailable = ps.status === 'available';
         return `
-          <a href="/cyber/ps/${ps.playstation_number}" class="ps-card ${ps.status}">
-            <div class="ps-number">${ps.playstation_number}</div>
+          <a href="/booking/${ps.station_number}" class="ps-card ${ps.status}">
+            <div class="ps-number">${ps.station_number}</div>
             <div class="ps-name">${ps.name}</div>
             <span class="ps-status ${isAvailable ? 'status-available' : 'status-occupied'}">
               ${isAvailable ? 'AVAILABLE' : 'IN USE'}

@@ -142,7 +142,7 @@ onclock/
 │   │   └── 001_initial.sql  # Database schema
 │   └── frontend/
 │       ├── index.html       # Station selection
-│       ├── ps-menu.html     # Booking page
+│       ├── station-menu.html # Booking page
 │       ├── track.html       # Live countdown timer
 │       ├── dashboard.html   # Owner dashboard
 │       ├── customers.html   # Customer database
@@ -190,7 +190,7 @@ onclock/
 | Route | File | Description |
 |-------|------|-------------|
 | `/` | `index.html` | Station selection |
-| `/ps/{n}` | `ps-menu.html` | Booking page |
+| `/booking/{n}` | `station-menu.html` | Booking page |
 | `/track` | `track.html` | Live countdown timer |
 | `/dashboard` | `dashboard.html` | Owner dashboard |
 | `/customers` | `customers.html` | Customer database |
