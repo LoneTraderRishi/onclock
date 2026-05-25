@@ -20,25 +20,27 @@
 
 OnClock is a **production-ready session management platform** for any business with bookable stations, slots, or units. It handles the full lifecycle — customer booking → live timer → billing → owner monitoring — so you don't have to build any of it.
 
+Customers access it from any phone — share the link via **QR code, SMS, WhatsApp, a shared tablet/kiosk, NFC tag, or just a printed URL**. The web app works on any device with a browser.
+
 ---
 
 ## 🏢 Use Cases
 
 ### 🎮 Gaming Lounges
 *Manage PlayStation/PC stations with hourly billing.*
-> Customer scans a QR, picks a station, pays via UPI. Live countdown shows remaining time. Owner sees all active sessions, extends or ends sessions, tracks revenue. Per-player billing for group bookings.
+> Customers open a link on their phone, pick a station, pay via UPI. Live countdown shows remaining time. Owner sees all active sessions, extends or ends sessions, tracks revenue. Per-player billing for group bookings.
 
 ### 🖥️ Co-working Spaces
 *Desks, meeting rooms, and phone booths by the hour.*
-> Members scan to book a desk, the timer runs while they're checked in, and billing auto-calculates. Owner sees occupancy rates, frequent members, and revenue.
+> Members open a link to book a desk, the timer runs while they're checked in, and billing auto-calculates. Owner sees occupancy rates, frequent members, and revenue.
 
 ### 🧺 Laundry Mats
 *Washing machines and dryers on a timer.*
-> Customer picks a machine, pays for the cycle duration. Timer counts down. When it ends, the next customer can start. Owner sees machine utilization and maintenance needs.
+> Customer picks a machine on their phone, pays for the cycle duration. Timer counts down. When it ends, the next customer can start. Owner sees machine utilization and maintenance needs.
 
 ### 🚗 Car / Bike Wash Bays
 *Wash bays with time-based pricing.*
-> Customer books a bay, pays for 15/30/60 min, timer tracks their usage. Extend if needed. Owner monitors all bays from one dashboard.
+> Customer books a bay from their phone, pays for 15/30/60 min, timer tracks their usage. Extend if needed. Owner monitors all bays from one dashboard.
 
 ### 🏋️ Gyms & Fitness Studios
 *Equipment slots, court bookings, class slots.*
@@ -64,7 +66,7 @@ OnClock is a **production-ready session management platform** for any business w
 
 | Feature | Description |
 |---------|-------------|
-| 📱 **Mobile-first booking** | Scan a QR code, select a station, choose duration, pay via UPI |
+| 📱 **Mobile-first booking** | Open a link, pick a station, choose duration, pay via UPI — works on any phone |
 | ⏱️ **Live countdown timer** | Real-time session timer with progress indicator |
 | 💳 **UPI Payments** | GPay / PhonePe / Paytm deep links with pre-filled amounts |
 | 🆓 **Free buffer time** | +5 min courtesy buffer on every booking |
