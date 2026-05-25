@@ -13,6 +13,16 @@
     <img src="https://img.shields.io/badge/FastAPI-0.115-green" alt="FastAPI">
     <img src="https://img.shields.io/badge/Supabase-PostgreSQL-3ecf8e" alt="Supabase">
     <img src="https://img.shields.io/badge/license-MIT-yellow" alt="MIT License">
+    <img src="https://github.com/LoneTraderRishi/onclock/actions/workflows/ci.yml/badge.svg" alt="CI">
+    <img src="https://img.shields.io/github/stars/LoneTraderRishi/onclock?style=social" alt="Stars">
+  </p>
+  <p>
+    <a href="#-live-demo">🚀 Live Demo</a> •
+    <a href="#features">Features</a> •
+    <a href="#quick-start">Quick Start</a> •
+    <a href="#architecture">Architecture</a> •
+    <a href="#api">API</a> •
+    <a href="#deployment">Deployment</a>
   </p>
 </div>
 
@@ -21,6 +31,25 @@
 OnClock is a **production-ready session management platform** for any business with bookable stations, slots, or units. It handles the full lifecycle — customer booking → live timer → billing → owner monitoring — so you don't have to build any of it.
 
 Customers access it from any phone — share the link via **QR code, SMS, WhatsApp, a shared tablet/kiosk, NFC tag, or just a printed URL**. The web app works on any device with a browser.
+
+---
+
+## 🚀 Live Demo
+
+Try it yourself right now:
+
+| Link | Description |
+|------|-------------|
+| [**onclock.up.railway.app**](https://onclock.up.railway.app) | Customer station selection |
+| [**onclock.up.railway.app/dashboard**](https://onclock.up.railway.app/dashboard) | Owner dashboard (password: `demo`) |
+
+> QR code ready — print [onclock.up.railway.app/qr-codes](https://onclock.up.railway.app/qr-codes) and stick it at your business!
+
+---
+
+## 🎥 Demo
+
+![Full session flow](screenshots/demo.gif)
 
 ---
 
@@ -247,6 +276,10 @@ onclock/
 
 ## 🚢 Deployment
 
+### One-Click Deploy
+
+[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/new/template?template=https://github.com/LoneTraderRishi/onclock)
+
 ### Railway (recommended)
 
 ```bash
@@ -267,6 +300,30 @@ pip install -r requirements.txt
 python main.py
 # Runs on http://localhost:8000
 ```
+
+---
+
+## 🧪 Tests
+
+```bash
+cd backend
+pip install pytest pytest-asyncio httpx
+python -m pytest tests/ -v
+```
+
+![Tests](https://github.com/LoneTraderRishi/onclock/actions/workflows/ci.yml/badge.svg)
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! See [CONTRIBUTING.md](.github/CONTRIBUTING.md) for setup and workflow.
+
+1. Fork the repo
+2. Create a feature branch (`git checkout -b feature/amazing`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push (`git push origin feature/amazing`)
+5. Open a Pull Request
 
 ---
 
