@@ -346,8 +346,13 @@
       border-bottom: 1px solid rgba(255,255,255,0.1);
     }
     
-    .session-info div:last-child {
-      border-bottom: none;
+  @media (max-width: 480px) {
+      .modal { width: 95%; }
+    }
+    @media (min-width: 1024px) {
+      body { max-width: 700px; padding: 30px; }
+      .logo-img { height: 70px; }
+      .section-title { font-size: 22px; }
     }
   </style>
 </head>
