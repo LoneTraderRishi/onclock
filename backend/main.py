@@ -136,6 +136,28 @@ FRONTEND_DIR = BASE_DIR / "frontend"
 BUSINESS_NAME = os.getenv("BUSINESS_NAME", "Station")
 DASHBOARD_PASSWORD = os.getenv("DASHBOARD_PASSWORD", "changeme")
 HOURLY_RATE = float(os.getenv("HOURLY_RATE", "50"))
+CURRENCY = os.getenv("CURRENCY", "INR")
+
+
+def get_currency_config():
+    """Map currency code to display config for the frontend."""
+    currencies = {
+        "INR": {"symbol": "₹", "name": "Indian Rupee", "decimal_places": 0},
+        "USD": {"symbol": "$", "name": "US Dollar", "decimal_places": 2},
+        "EUR": {"symbol": "€", "name": "Euro", "decimal_places": 2},
+        "GBP": {"symbol": "£", "name": "British Pound", "decimal_places": 2},
+        "AED": {"symbol": "د.إ", "name": "UAE Dirham", "decimal_places": 2},
+    }
+    code = os.getenv("CURRENCY", "INR")
+    cfg = currencies.get(code, currencies["INR"])
+    return {
+        "currency_symbol": cfg["symbol"],
+        "currency_code": code,
+        "currency_name": cfg["name"],
+        "decimal_places": cfg["decimal_places"],
+        "business_name": os.getenv("BUSINESS_NAME", "Station"),
+        "upi_id": os.getenv("UPI_ID", ""),
+    }
 
 # ─── Password Hashing ───────────────────────────────────────────────
 
@@ -267,6 +289,12 @@ async def upi_qr():
     if not f.exists():
         raise HTTPException(404)
     return FileResponse(f, media_type="image/jpeg")
+
+
+@app.get("/api/config")
+async def get_config():
+    """Return business configuration including currency settings."""
+    return get_currency_config()
 
 
 # ═══════════════════════════════════════════════════════════════════════

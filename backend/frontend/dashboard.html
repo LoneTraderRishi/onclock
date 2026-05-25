@@ -789,6 +789,11 @@
   </div>
   
   <script>
+    // Default currency config (overridden by /api/config)
+    window.CURRENCY_SYMBOL = '₹';
+    window.CURRENCY_CODE = 'INR';
+    fetch('/api/config').then(r=>r.json()).then(d=>{window.CURRENCY_SYMBOL=d.currency_symbol;window.CURRENCY_CODE=d.currency_code;}).catch(()=>{});
+
     const API = '';
     const VERSION = 2; // Bump to force cache refresh
     let PASSWORD = '';
@@ -927,7 +932,7 @@
                   📅 Scheduled: ${scheduled}
                 </div>
                 <div class="time" style="font-size:11px;">
-                  ${hoursLabel(b.hours_booked)} · ₹${Math.round(b.total_amount)}
+                  ${hoursLabel(b.hours_booked)} · ${window.CURRENCY_SYMBOL}${Math.round(b.total_amount)}
                 </div>
               </div>
               <div style="display:flex;flex-direction:column;gap:6px;margin-top:10px;">
@@ -1016,14 +1021,14 @@
           <div class="expiry-modal-row"><span class="label">Player</span><span class="value">${s.player_name || 'Guest'}</span></div>
           <div class="expiry-modal-row"><span class="label">Station</span><span class="value">PS ${s.station_number || '?'}</span></div>
           <div class="expiry-modal-row"><span class="label">Duration</span><span class="value">${hoursLabel(s.hours_booked || 0)}</span></div>
-          <div class="expiry-modal-row"><span class="label">Total</span><span class="value amount">₹${Math.round(s.total_amount || 0)}</span></div>
+          <div class="expiry-modal-row"><span class="label">Total</span><span class="value amount">${window.CURRENCY_SYMBOL}${Math.round(s.total_amount || 0)}</span></div>
         `;
       } else {
         sub.textContent = `${sessions.length} sessions have ended`;
         details.innerHTML = sessions.map(s => `
           <div class="expiry-modal-row">
             <span class="label">PS ${s.station_number || '?'} — ${s.player_name || 'Guest'}</span>
-            <span class="value amount">₹${Math.round(s.total_amount || 0)}</span>
+            <span class="value amount">${window.CURRENCY_SYMBOL}${Math.round(s.total_amount || 0)}</span>
           </div>
         `).join('');
       }
@@ -1097,7 +1102,7 @@
         document.getElementById('statAvailable').textContent = data.available;
         document.getElementById('statOccupied').textContent = data.occupied;
         document.getElementById('statActive').textContent = data.active_sessions;
-        document.getElementById('statRevenue').textContent = `₹${Math.round(data.revenue_today)}`;
+        document.getElementById('statRevenue').textContent = `${window.CURRENCY_SYMBOL}${Math.round(data.revenue_today)}`;
       } catch(e) {}
     }
     
@@ -1136,7 +1141,7 @@
                   </div>
                   <div style="text-align:right;">
                     <span style="color:${isExpired ? 'var(--danger)' : 'var(--accent)'};font-weight:600;">${isExpired ? 'TIME UP' : `${pHours}h ${pM}m`}</span>
-                    <span style="color:var(--warning);margin-left:8px;">₹${Math.round(p.amount)}</span>
+                    <span style="color:var(--warning);margin-left:8px;">${window.CURRENCY_SYMBOL}${Math.round(p.amount)}</span>
                   </div>
                 </div>
               `;
@@ -1152,7 +1157,7 @@
                   <div class="session-row"><span>Players</span><span>${ps.current_session.num_players}</span></div>
                   <div class="session-row"><span>Started</span><span>${start.toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit' })}</span></div>
                   <div class="session-row"><span>Ends at</span><span>${end.toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit' })}</span></div>
-                  <div class="session-row"><span>Session Total</span><span style="color:var(--warning);font-weight:700;">₹${Math.round(ps.current_session.total_amount)}</span></div>
+                  <div class="session-row"><span>Session Total</span><span style="color:var(--warning);font-weight:700;">${window.CURRENCY_SYMBOL}${Math.round(ps.current_session.total_amount)}</span></div>
                 </div>
                 ${players.length > 0 ? `<div style="margin-bottom:10px;"><div style="font-size:11px;color:var(--text-soft);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">👤 Players Breakdown</div>${playerRows}</div>` : ''}
                 <div class="time-left">${hours}h ${m}m left</div>
@@ -1173,7 +1178,7 @@
               </div>
               <div class="session-details">
                 <div class="session-row"><span>Name</span><span>${ps.name}</span></div>
-                <div class="session-row"><span>Rate</span><span>₹${ps.hourly_rate}/hr</span></div>
+                <div class="session-row"><span>Rate</span><span>${window.CURRENCY_SYMBOL}${ps.hourly_rate}/hr</span></div>
               </div>
               <button class="end-btn" style="margin-top:12px;background:var(--success);" onclick="openStartModal(${ps.id}, ${ps.station_number}, ${ps.hourly_rate})">🎮 Start Session</button>
             </div>
@@ -1203,7 +1208,7 @@
               <div class="player">${s.player_name || 'Guest'} (${s.num_players} players)</div>
               <div class="time">Ended: ${new Date(s.end_time || s.start_time).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })} IST</div>
             </div>
-            <div class="session-amount">₹${Math.round(s.total_amount)}</div>
+            <div class="session-amount">${window.CURRENCY_SYMBOL}${Math.round(s.total_amount)}</div>
           </div>
         `).join('');
       } catch(e) {}
@@ -1253,7 +1258,7 @@
           return;
         }
         
-        showAlert(`Extended Station ${psNumber} by ${hours}h — extra ₹${data.extra_charge}`);
+        showAlert(`Extended Station ${psNumber} by ${hours}h — extra ${window.CURRENCY_SYMBOL}${data.extra_charge}`);
         loadAll();
       } catch(e) {
         alert('Failed to extend session');
@@ -1280,12 +1285,12 @@
     
     function updateAddPlayerBuild() {
       const hours = parseFloat(document.getElementById('addPlayerHours').value) || 1;
-      // Group rate ₹125/hr applies for 2+ players, but we assume at least 2 since we're adding to an existing session
+      // Group rate applies for 2+ players, but we assume at least 2 since we're adding to an existing session
       const rate = 125;
       const total = hours * rate;
-      document.getElementById('addPlayerRate').textContent = `₹${rate}/hr`;
+      document.getElementById('addPlayerRate').textContent = `${window.CURRENCY_SYMBOL}${rate}/hr`;
       document.getElementById('addPlayerBuildHours').textContent = `${hours}h`;
-      document.getElementById('addPlayerTotal').textContent = `₹${Math.round(total)}`;
+      document.getElementById('addPlayerTotal').textContent = `${window.CURRENCY_SYMBOL}${Math.round(total)}`;
       // Show estimated end time (IST)
       const now = new Date();
       const endTime = new Date(now.getTime() + hours * 60 * 60 * 1000 + 5 * 60 * 1000);
@@ -1328,7 +1333,7 @@
           return;
         }
         
-        msgEl.textContent = `✅ ${name} added! Build: ₹${Math.round(data.extra_charge)} | Session: ₹${Math.round(data.session_total)}`;
+        msgEl.textContent = `✅ ${name} added! Build: ${window.CURRENCY_SYMBOL}${Math.round(data.extra_charge)} | Session: ${window.CURRENCY_SYMBOL}${Math.round(data.session_total)}`;
         msgEl.className = 'modal-msg success';
         
         setTimeout(() => {
@@ -1348,12 +1353,12 @@
     function openStartModal(psId, psNum, rate) {
       startPsId = psId;
       startRate = rate;
-      document.getElementById('startModalSub').textContent = `PS ${psNum} — ₹${rate}/hr`;
+      document.getElementById('startModalSub').textContent = `PS ${psNum} — ${window.CURRENCY_SYMBOL}${rate}/hr`;
       document.getElementById('startPlayerName').value = '';
       document.getElementById('startPlayerPhone').value = '';
       document.getElementById('startNumPlayers').value = 1;
       document.getElementById('startHours').value = 1;
-      document.getElementById('startTotal').textContent = `Total: ₹${rate}`;
+      document.getElementById('startTotal').textContent = `Total: ${window.CURRENCY_SYMBOL}${rate}`;
       document.getElementById('startMsg').style.display = 'none';
       document.getElementById('startSessionModal').classList.add('active');
       
@@ -1366,7 +1371,7 @@
       const players = parseInt(document.getElementById('startNumPlayers').value) || 1;
       const hours = parseFloat(document.getElementById('startHours').value) || 0;
       const effectiveRate = players <= 1 ? startRate : 125 * players;
-      document.getElementById('startTotal').textContent = `Total: ₹${Math.round(hours * effectiveRate)}`;
+      document.getElementById('startTotal').textContent = `Total: ${window.CURRENCY_SYMBOL}${Math.round(hours * effectiveRate)}`;
     }
     
     function closeStartModal() {
@@ -1416,7 +1421,7 @@
         }
         
         msg.className = 'modal-msg success';
-        msg.textContent = `✅ ${data.player_name} started! Total: ₹${Math.round(data.total)}`;
+        msg.textContent = `✅ ${data.player_name} started! Total: ${window.CURRENCY_SYMBOL}${Math.round(data.total)}`;
         msg.style.display = 'block';
         closeStartModal();
         loadAll();

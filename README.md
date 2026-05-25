@@ -17,7 +17,6 @@
     <img src="https://img.shields.io/github/stars/LoneTraderRishi/onclock?style=social" alt="Stars">
   </p>
   <p>
-    <a href="#-live-demo">🚀 Live Demo</a> •
     <a href="#features">Features</a> •
     <a href="#quick-start">Quick Start</a> •
     <a href="#architecture">Architecture</a> •
@@ -31,19 +30,6 @@
 OnClock is a **production-ready session management platform** for any business with bookable stations, slots, or units. It handles the full lifecycle — customer booking → live timer → billing → owner monitoring — so you don't have to build any of it.
 
 Customers access it from any phone — share the link via **QR code, SMS, WhatsApp, a shared tablet/kiosk, NFC tag, or just a printed URL**. The web app works on any device with a browser.
-
----
-
-## 🚀 Live Demo
-
-Try it yourself right now:
-
-| Link | Description |
-|------|-------------|
-| [**onclock.up.railway.app**](https://onclock.up.railway.app) | Customer station selection |
-| [**onclock.up.railway.app/dashboard**](https://onclock.up.railway.app/dashboard) | Owner dashboard (password: `demo`) |
-
-> QR code ready — print [onclock.up.railway.app/qr-codes](https://onclock.up.railway.app/qr-codes) and stick it at your business!
 
 ---
 

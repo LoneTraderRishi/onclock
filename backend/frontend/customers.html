@@ -341,6 +341,11 @@
   </div>
 
   <script>
+    // Default currency config (overridden by /api/config)
+    window.CURRENCY_SYMBOL = '₹';
+    window.CURRENCY_CODE = 'INR';
+    fetch('/api/config').then(r=>r.json()).then(d=>{window.CURRENCY_SYMBOL=d.currency_symbol;window.CURRENCY_CODE=d.currency_code;}).catch(()=>{});
+
     const API = '';
     let PASSWORD = '';
     let pollInterval = null;
@@ -393,7 +398,7 @@
             <td class="c-name">${c.name}</td>
             <td class="c-phone">${c.phone}</td>
             <td class="c-visits">${c.visit_count}</td>
-            <td class="c-spent">₹${Math.round(c.total_spent)}</td>
+            <td class="c-spent">${window.CURRENCY_SYMBOL}${Math.round(c.total_spent)}</td>
             <td class="c-favps">${favPs}</td>
             <td class="c-last">${first}</td>
             <td class="c-last">${last}</td>
