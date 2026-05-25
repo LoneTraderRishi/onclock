@@ -262,22 +262,6 @@ onclock/
 
 ## 🚢 Deployment
 
-### One-Click Deploy
-
-[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/new/template?template=https://github.com/LoneTraderRishi/onclock)
-
-### Railway (recommended)
-
-```bash
-# Push to GitHub
-git push origin main
-
-# In Railway dashboard:
-# 1. Connect your GitHub repo
-# 2. Set start command: cd backend && uvicorn main:app --host 0.0.0.0 --port $PORT
-# 3. Add all env vars from .env.example
-```
-
 ### Self-hosted
 
 ```bash
@@ -323,4 +307,3 @@ Contributions are welcome! See [CONTRIBUTING.md](.github/CONTRIBUTING.md) for se
 
 - [FastAPI](https://fastapi.tiangolo.com/)
 - [Supabase](https://supabase.com/)
-- [Railway](https://railway.app/)
