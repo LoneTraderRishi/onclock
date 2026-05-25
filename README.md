@@ -17,7 +17,6 @@
     <img src="https://img.shields.io/github/stars/LoneTraderRishi/onclock?style=social" alt="Stars">
   </p>
   <p>
-    <a href="#-live-demo">🚀 Live Demo</a> •
     <a href="#features">Features</a> •
     <a href="#quick-start">Quick Start</a> •
     <a href="#architecture">Architecture</a> •
@@ -31,19 +30,6 @@
 OnClock is a **production-ready session management platform** for any business with bookable stations, slots, or units. It handles the full lifecycle — customer booking → live timer → billing → owner monitoring — so you don't have to build any of it.
 
 Customers access it from any phone — share the link via **QR code, SMS, WhatsApp, a shared tablet/kiosk, NFC tag, or just a printed URL**. The web app works on any device with a browser.
-
----
-
-## 🚀 Live Demo
-
-Try it yourself right now:
-
-| Link | Description |
-|------|-------------|
-| [**onclock.up.railway.app**](https://onclock.up.railway.app) | Customer station selection |
-| [**onclock.up.railway.app/dashboard**](https://onclock.up.railway.app/dashboard) | Owner dashboard (password: `demo`) |
-
-> QR code ready — print [onclock.up.railway.app/qr-codes](https://onclock.up.railway.app/qr-codes) and stick it at your business!
 
 ---
 
@@ -276,22 +262,6 @@ onclock/
 
 ## 🚢 Deployment
 
-### One-Click Deploy
-
-[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/new/template?template=https://github.com/LoneTraderRishi/onclock)
-
-### Railway (recommended)
-
-```bash
-# Push to GitHub
-git push origin main
-
-# In Railway dashboard:
-# 1. Connect your GitHub repo
-# 2. Set start command: cd backend && uvicorn main:app --host 0.0.0.0 --port $PORT
-# 3. Add all env vars from .env.example
-```
-
 ### Self-hosted
 
 ```bash
@@ -337,4 +307,3 @@ Contributions are welcome! See [CONTRIBUTING.md](.github/CONTRIBUTING.md) for se
 
 - [FastAPI](https://fastapi.tiangolo.com/)
 - [Supabase](https://supabase.com/)
-- [Railway](https://railway.app/)

@@ -5,8 +5,7 @@ without requiring a real database connection.
 """
 import os
 import sys
-import sys
-from unittest.mock import MagicMock, patch, AsyncMock
+from unittest.mock import MagicMock, patch
 
 # Mock slowapi BEFORE any app imports — must be a proper ASGI middleware
 class MockSlowAPIMiddleware:
@@ -45,6 +44,7 @@ os.environ["UPI_PAYEE_NAME"] = "Test Business"
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 import httpx
+from httpx import ASGITransport
 import pytest
 from main import app
 
@@ -89,7 +89,8 @@ def mock_supabase():
 
 @pytest.fixture
 def client():
-    return httpx.AsyncClient(app=app, base_url="http://test")
+    transport = ASGITransport(app=app)
+    return httpx.AsyncClient(transport=transport, base_url="http://test")
 
 
 @pytest.mark.asyncio
@@ -198,6 +199,46 @@ async def test_api_sessions_with_auth(mock_supabase, client):
     assert resp.status_code == 200
     data = resp.json()
     assert len(data) >= 1
+
+
+@pytest.mark.asyncio
+async def test_api_config_default(client):
+    """Test /api/config returns default config from test env."""
+    async with client:
+        resp = await client.get("/api/config")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["currency"] == "INR"
+    assert data["currency_symbol"] == "₹"
+    assert data["is_inr"] == True
+    assert data["hourly_rate"] == 50
+    assert data["business_name"] == "Test Business"
+    assert data["owner_whatsapp"] == ""
+    assert data["upi_id"] == "test@upi"
+    assert data["upi_payee_name"] == "Test Business"
+
+
+@pytest.mark.asyncio
+async def test_api_config_fields(client):
+    """Test /api/config returns all expected fields."""
+    async with client:
+        resp = await client.get("/api/config")
+    assert resp.status_code == 200
+    data = resp.json()
+    for field in ["currency", "currency_symbol", "is_inr", "hourly_rate",
+                  "business_name", "owner_whatsapp", "upi_id", "upi_payee_name"]:
+        assert field in data
+    assert isinstance(data["is_inr"], bool)
+    assert isinstance(data["hourly_rate"], (int, float))
+
+
+@pytest.mark.asyncio
+async def test_api_config_owner_whatsapp(client):
+    """Test owner_whatsapp field is present in config."""
+    async with client:
+        resp = await client.get("/api/config")
+    data = resp.json()
+    assert "owner_whatsapp" in data
 
 
 @pytest.mark.asyncio

@@ -142,6 +142,17 @@
       .tagline { font-size: 18px; }
     }
   </style>
+  <script>
+    let CURRENCY_SYMBOL = '₹';
+    let IS_INR = true;
+    fetch('/api/config').then(r=>r.json()).then(c=>{
+      CURRENCY_SYMBOL = c.currency_symbol;
+      IS_INR = c.is_inr;
+      document.querySelectorAll('.price-tag').forEach(el => {
+        el.textContent = el.textContent.replace(/^[₹$€£¥]/, CURRENCY_SYMBOL);
+      });
+    }).catch(()=>{});
+  </script>
 </head>
 <body>
   <div class="header">
@@ -197,7 +208,7 @@
             <span class="ps-status ${isAvailable ? 'status-available' : 'status-occupied'}">
               ${isAvailable ? 'AVAILABLE' : 'IN USE'}
             </span>
-            <div class="price-tag">₹${ps.hourly_rate}/hr</div>
+            <div class="price-tag">${CURRENCY_SYMBOL}${ps.hourly_rate}/hr</div>
           </a>
         `;
       }).join('');

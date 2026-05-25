@@ -275,6 +275,14 @@
       .container { max-width: 1400px; padding: 30px; }
     }
   </style>
+  <script>
+    let CURRENCY_SYMBOL = '₹';
+    let IS_INR = true;
+    fetch('/api/config').then(r=>r.json()).then(c=>{
+      CURRENCY_SYMBOL = c.currency_symbol;
+      IS_INR = c.is_inr;
+    }).catch(()=>{});
+  </script>
 </head>
 <body>
   <!-- Login -->
@@ -393,7 +401,7 @@
             <td class="c-name">${c.name}</td>
             <td class="c-phone">${c.phone}</td>
             <td class="c-visits">${c.visit_count}</td>
-            <td class="c-spent">₹${Math.round(c.total_spent)}</td>
+            <td class="c-spent">${CURRENCY_SYMBOL}${Math.round(c.total_spent)}</td>
             <td class="c-favps">${favPs}</td>
             <td class="c-last">${first}</td>
             <td class="c-last">${last}</td>

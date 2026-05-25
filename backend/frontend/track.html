@@ -168,7 +168,7 @@
       <!-- Payment Card -->
       <div class="payment-card" id="paymentCard">
         <div class="payment-label">Amount Due</div>
-        <div class="payment-amount" id="payAmount">₹0</div>
+        <div class="payment-amount" id="payAmount"><span data-currency>₹</span>0</div>
         <div style="margin:18px 0;height:1px;background:rgba(255,255,255,0.06);"></div>
 
         <div class="payment-label">UPI ID</div>
@@ -315,7 +315,7 @@
       const total = window._sessionData && window._sessionData.session ? window._sessionData.session.total_amount : 0;
       const stationNum = document.getElementById('psNumber').textContent;
       const playerName = document.getElementById('playerName').textContent;
-      document.getElementById('payAmount').textContent = '₹' + total;
+      document.getElementById('payAmount').textContent = CURRENCY_SYMBOL + total;
       if (total > 500) document.getElementById('payAmount').classList.add('warning');
 
       const upi = 'your-upi-id@upi';
@@ -333,12 +333,9 @@
       document.getElementById('phonepeLink').href = 'phonepe://pay?' + upiPIBody;
       document.getElementById('paytmLink').href = 'paytmmp://upi/pay?' + upiPIBody;
 
-      const waMsg = encodeURIComponent(
-        '💳 Payment\n\nStation: ' + stationNum + '\nPlayer: ' + playerName +
-        '\nAmount: ₹' + total + '\nUPI: ' + upi + '\n\n(Attach payment screenshot)'
-      );
-      document.getElementById('payWhatsApp').href = 'https://wa.me/0000000000?text=' + waMsg;
-      document.getElementById('whatsappLink').href = 'https://wa.me/0000000000?text=Hi,%20my%20Station' + stationNum + '%20session%20ended.%20Amount:%20₹' + total;
+      const waMsg = 'Hi, my Station ' + stationNum + ' session ended. Amount: ' + CURRENCY_SYMBOL + total + ' UPI: ' + upi + '\n\n(Attach payment screenshot)';
+      document.getElementById('payWhatsApp').href = 'https://wa.me/' + OWNER_WHATSAPP + '?text=' + encodeURIComponent(waMsg);
+      document.getElementById('whatsappLink').href = 'https://wa.me/' + OWNER_WHATSAPP + '?text=Hi,%20my%20Station' + stationNum + '%20session%20ended.%20Amount:%20' + CURRENCY_SYMBOL + total;
 
       document.getElementById('paymentCard').classList.add('show');
     }
@@ -351,6 +348,20 @@
         setTimeout(() => { btn.textContent = '📋 Copy'; }, 2000);
       }).catch(() => {});
     }
+  </script>
+  <script>
+      let CURRENCY_SYMBOL = '₹';
+      let IS_INR = true;
+      let UPI_ID = '';
+      let UPI_PAYEE_NAME = '';
+      let OWNER_WHATSAPP = '0000000000';
+      fetch('/api/config').then(r=>r.json()).then(c=>{
+        CURRENCY_SYMBOL = c.currency_symbol;
+        IS_INR = c.is_inr;
+        UPI_ID = c.upi_id;
+        UPI_PAYEE_NAME = c.upi_payee_name;
+        OWNER_WHATSAPP = c.owner_whatsapp || '0000000000';
+    }).catch(()=>{});
   </script>
 <div style="text-align:center;padding:20px;font-size:12px;color:#666;border-top:1px solid #333;margin-top:40px;">Developed by <a href="https://github.com/LoneTraderRishi" style="color:#6c5ce7;text-decoration:none;font-weight:600;">QuantRishi</a></div>
 </body>

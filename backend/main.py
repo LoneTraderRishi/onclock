@@ -1,6 +1,7 @@
 import os
 import re
 import json
+import asyncio
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import List, Optional
@@ -25,6 +26,7 @@ from models import (
     SessionStart, SessionEnd, StationCreate,
     AdvanceBooking
 )
+from notifications import send_message, fmt_session_start, fmt_session_end, fmt_booking_created
 
 load_dotenv()
 
@@ -136,6 +138,33 @@ FRONTEND_DIR = BASE_DIR / "frontend"
 BUSINESS_NAME = os.getenv("BUSINESS_NAME", "Station")
 DASHBOARD_PASSWORD = os.getenv("DASHBOARD_PASSWORD", "changeme")
 HOURLY_RATE = float(os.getenv("HOURLY_RATE", "50"))
+CURRENCY = os.getenv("CURRENCY", "INR")
+
+
+def get_currency_config():
+    """Map currency code to display config for the frontend."""
+    currencies = {
+        "INR": {"symbol": "₹", "name": "Indian Rupee", "decimal_places": 0},
+        "USD": {"symbol": "$", "name": "US Dollar", "decimal_places": 2},
+        "EUR": {"symbol": "€", "name": "Euro", "decimal_places": 2},
+        "GBP": {"symbol": "£", "name": "British Pound", "decimal_places": 2},
+        "AED": {"symbol": "د.إ", "name": "UAE Dirham", "decimal_places": 2},
+    }
+    code = os.getenv("CURRENCY", "INR")
+    cfg = currencies.get(code, currencies["INR"])
+    return {
+        "currency_symbol": cfg["symbol"],
+        "currency_code": code,
+        "currency_name": cfg["name"],
+        "decimal_places": cfg["decimal_places"],
+        "business_name": os.getenv("BUSINESS_NAME", "Station"),
+        "upi_id": os.getenv("UPI_ID", ""),
+    }
+
+# ─── Currency Config ─────────────────────────────────────────────
+CURRENCY = os.getenv("CURRENCY", "INR")
+CURRENCY_SYMBOL = os.getenv("CURRENCY_SYMBOL", "₹")
+IS_INR = CURRENCY.upper() == "INR"
 
 # ─── Password Hashing ───────────────────────────────────────────────
 
@@ -269,6 +298,21 @@ async def upi_qr():
     return FileResponse(f, media_type="image/jpeg")
 
 
+@app.get("/api/config")
+async def get_config():
+    """Public config — currency, business name, etc."""
+    return {
+        "currency": CURRENCY,
+        "currency_symbol": CURRENCY_SYMBOL,
+        "is_inr": IS_INR,
+        "business_name": BUSINESS_NAME,
+        "hourly_rate": HOURLY_RATE,
+        "upi_id": os.getenv("UPI_ID", ""),
+        "upi_payee_name": os.getenv("UPI_PAYEE_NAME", ""),
+        "owner_whatsapp": os.getenv("OWNER_WHATSAPP", ""),
+    }
+
+
 # ═══════════════════════════════════════════════════════════════════════
 # STATION ENDPOINTS
 # ═══════════════════════════════════════════════════════════════════════
@@ -392,6 +436,22 @@ async def start_session(session: SessionStart):
 
     db.table("stations").update({"status": "occupied"}).eq("id", session.station_id).execute()
 
+    # Notify owner
+    station_info = station.data[0]
+    asyncio.ensure_future(send_message(
+        fmt_session_start(
+            station_name=station_info["name"],
+            station_number=station_info["station_number"],
+            player_name=session.player_name,
+            player_phone=session.player_phone,
+            num_players=session.num_players or 1,
+            hours=hours,
+            total=total,
+            currency_symbol=CURRENCY_SYMBOL,
+            session_id=result.data[0]["id"],
+        )
+    ))
+
     return {"ok": True, "session_id": result.data[0]["id"], "total": total}
 
 
@@ -446,6 +506,22 @@ async def dashboard_start_session(
         raise HTTPException(status_code=400, detail="Failed to start session")
 
     db.table("stations").update({"status": "occupied"}).eq("id", station_id).execute()
+
+    # Notify owner
+    station_info = station.data[0]
+    asyncio.ensure_future(send_message(
+        fmt_session_start(
+            station_name=station_info["name"],
+            station_number=station_info["station_number"],
+            player_name=player_name,
+            player_phone=player_phone,
+            num_players=num_players,
+            hours=hours,
+            total=total,
+            currency_symbol=CURRENCY_SYMBOL,
+            session_id=result.data[0]["id"],
+        )
+    ))
 
     return {"ok": True, "session_id": result.data[0]["id"], "total": total, "player_name": player_name}
 
@@ -587,6 +663,22 @@ async def create_advance_booking(booking: AdvanceBooking):
         raise HTTPException(status_code=400, detail="Failed to create booking")
 
     created = result.data[0]
+
+    # Notify owner about new booking
+    station_info = station.data[0]
+    asyncio.ensure_future(send_message(
+        fmt_booking_created(
+            station_name=station_info["name"],
+            station_number=station_info["station_number"],
+            player_name=booking.player_name,
+            scheduled_start=booking.scheduled_start,
+            hours=hours,
+            total=total,
+            currency_symbol=CURRENCY_SYMBOL,
+            booking_id=created["id"],
+        )
+    ))
+
     return {
         "ok": True,
         "booking_id": created["id"],
@@ -721,6 +813,23 @@ async def end_session(session_id: int, update: SessionEnd, _: None = Depends(ver
     }).eq("id", session_id).execute()
 
     db.table("stations").update({"status": "available"}).eq("id", sess["station_id"]).execute()
+
+    # Notify owner
+    station_info = db.table("stations").select("name,station_number").eq("id", sess["station_id"]).execute()
+    if station_info.data:
+        si = station_info.data[0]
+        asyncio.ensure_future(send_message(
+            fmt_session_end(
+                station_name=si["name"],
+                station_number=si["station_number"],
+                player_name=sess.get("player_name", "Guest"),
+                hours=booked_hours,
+                total=total_amount,
+                currency_symbol=CURRENCY_SYMBOL,
+                reason=update.end_reason or "",
+                session_id=session_id,
+            )
+        ))
 
     return {"ok": True, "actual_hours": booked_hours, "total": total_amount}
 
