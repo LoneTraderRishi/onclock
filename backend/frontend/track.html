@@ -312,7 +312,7 @@
 
       // Show payment card
       const total = window._sessionData && window._sessionData.session ? window._sessionData.session.total_amount : 0;
-      const psNum = document.getElementById('psNumber').textContent;
+      const stationNum = document.getElementById('psNumber').textContent;
       const playerName = document.getElementById('playerName').textContent;
       document.getElementById('payAmount').textContent = '₹' + total;
       if (total > 500) document.getElementById('payAmount').classList.add('warning');
