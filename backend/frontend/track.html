@@ -334,8 +334,8 @@
       document.getElementById('paytmLink').href = 'paytmmp://upi/pay?' + upiPIBody;
 
       const waMsg = 'Hi, my Station ' + stationNum + ' session ended. Amount: ' + CURRENCY_SYMBOL + total + ' UPI: ' + upi + '\n\n(Attach payment screenshot)';
-      document.getElementById('payWhatsApp').href = 'https://wa.me/0000000000?text=' + encodeURIComponent(waMsg);
-      document.getElementById('whatsappLink').href = 'https://wa.me/0000000000?text=Hi,%20my%20Station' + stationNum + '%20session%20ended.%20Amount:%20' + CURRENCY_SYMBOL + total;
+      document.getElementById('payWhatsApp').href = 'https://wa.me/' + OWNER_WHATSAPP + '?text=' + encodeURIComponent(waMsg);
+      document.getElementById('whatsappLink').href = 'https://wa.me/' + OWNER_WHATSAPP + '?text=Hi,%20my%20Station' + stationNum + '%20session%20ended.%20Amount:%20' + CURRENCY_SYMBOL + total;
 
       document.getElementById('paymentCard').classList.add('show');
     }
@@ -350,15 +350,17 @@
     }
   </script>
   <script>
-    let CURRENCY_SYMBOL = '₹';
-    let IS_INR = true;
-    let UPI_ID = '';
-    let UPI_PAYEE_NAME = '';
-    fetch('/api/config').then(r=>r.json()).then(c=>{
-      CURRENCY_SYMBOL = c.currency_symbol;
-      IS_INR = c.is_inr;
-      UPI_ID = c.upi_id;
-      UPI_PAYEE_NAME = c.upi_payee_name;
+      let CURRENCY_SYMBOL = '₹';
+      let IS_INR = true;
+      let UPI_ID = '';
+      let UPI_PAYEE_NAME = '';
+      let OWNER_WHATSAPP = '0000000000';
+      fetch('/api/config').then(r=>r.json()).then(c=>{
+        CURRENCY_SYMBOL = c.currency_symbol;
+        IS_INR = c.is_inr;
+        UPI_ID = c.upi_id;
+        UPI_PAYEE_NAME = c.upi_payee_name;
+        OWNER_WHATSAPP = c.owner_whatsapp || '0000000000';
     }).catch(()=>{});
   </script>
 <div style="text-align:center;padding:20px;font-size:12px;color:#666;border-top:1px solid #333;margin-top:40px;">Developed by <a href="https://github.com/LoneTraderRishi" style="color:#6c5ce7;text-decoration:none;font-weight:600;">QuantRishi</a></div>
