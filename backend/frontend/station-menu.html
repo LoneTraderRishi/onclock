@@ -355,6 +355,26 @@
       .section-title { font-size: 22px; }
     }
   </style>
+  <script>
+    let CURRENCY_SYMBOL = '₹';
+    let IS_INR = true;
+    let UPI_ID = 'your-upi-id@upi';
+    let UPI_PAYEE_NAME = 'OnClock';
+    fetch('/api/config').then(r=>r.json()).then(c=>{
+      CURRENCY_SYMBOL = c.currency_symbol;
+      IS_INR = c.is_inr;
+      UPI_ID = c.upi_id || UPI_ID;
+      UPI_PAYEE_NAME = c.upi_payee_name || UPI_PAYEE_NAME;
+      // Hide UPI elements if not INR
+      if (!IS_INR) {
+        document.querySelectorAll('.upi-section, .payment-apps, .upi-qr-area').forEach(el => el.style.display = 'none');
+      }
+      // Update all static currency symbols
+      document.querySelectorAll('[data-currency]').forEach(el => {
+        el.textContent = CURRENCY_SYMBOL;
+      });
+    }).catch(()=>{});
+  </script>
 </head>
 <body>
   <div class="header">
@@ -402,8 +422,8 @@
     
     <div class="cost-display">
       <div class="cost-label">Total Cost</div>
-      <div class="cost-amount" id="totalCost">₹50</div>
-      <div class="cost-detail" id="costDetail">1 player × 1:05 × ₹150/hr</div>
+      <div class="cost-amount" id="totalCost"><span data-currency>₹</span>50</div>
+      <div class="cost-detail" id="costDetail">1 player × 1:05 × <span data-currency>₹</span>150/hr</div>
     </div>
     
     <div class="section">
@@ -447,11 +467,6 @@
 
   <div style="text-align:center;padding:20px;font-size:12px;color:#666;border-top:1px solid #333;margin-top:40px;">Developed by <a href="https://github.com/LoneTraderRishi" style="color:#6c5ce7;text-decoration:none;font-weight:600;">QuantRishi</a></div>
     <script>
-    // Default currency config (overridden by /api/config)
-    window.CURRENCY_SYMBOL = '₹';
-    window.CURRENCY_CODE = 'INR';
-    fetch('/api/config').then(r=>r.json()).then(d=>{window.CURRENCY_SYMBOL=d.currency_symbol;window.CURRENCY_CODE=d.currency_code;}).catch(()=>{});
-
     const API = '';
     const UPI_ID = 'your-upi-id@upi';
     const OWNER_WHATSAPP = '0000000000'; // Owner WhatsApp with country code
@@ -608,7 +623,7 @@
         }
         if (Notification.permission === 'granted') {
           new Notification('TIME\'S UP!', {
-            body: `Your gaming session at PS ${psNumber} has ended. Please pay ${window.CURRENCY_SYMBOL}${Math.round(window.currentSession?.total_amount || 0)} at the counter.`,
+            body: `Your gaming session at PS ${psNumber} has ended. Please pay ${CURRENCY_SYMBOL}${Math.round(window.currentSession?.total_amount || 0)} at the counter.`,
             icon: '/icon.svg',
             tag: 'timeup'
           });
@@ -707,7 +722,7 @@
         });
         const data = await res.json();
         if (data.ok) {
-          document.getElementById('extendStatus').textContent = `Added ${hours}h — pay ${window.CURRENCY_SYMBOL}${hours * rate} at counter`;
+          document.getElementById('extendStatus').textContent = `Added ${hours}h — pay ${CURRENCY_SYMBOL}${hours * rate} at counter`;
           document.getElementById('extendStatus').style.display = 'block';
           clearInterval(window.countdownInterval);
           renderOccupied({ ...window.currentSession, end_time: data.new_end_time });
@@ -748,13 +763,13 @@
     function updateCost() {
       const effectiveRate = selectedPlayers <= 1 ? hourlyRate : 125 * selectedPlayers;
       const total = selectedHours * effectiveRate;
-      document.getElementById('totalCost').textContent = `${window.CURRENCY_SYMBOL}${total}`;
+      document.getElementById('totalCost').textContent = `${CURRENCY_SYMBOL}${total}`;
       document.getElementById('costDetail').textContent = 
-        `${selectedPlayers} player${selectedPlayers > 1 ? 's' : ''} × ${hoursLabel(selectedHours)} × ${window.CURRENCY_SYMBOL}${selectedPlayers <= 1 ? hourlyRate : 125}/hr`;
+        `${selectedPlayers} player${selectedPlayers > 1 ? 's' : ''} × ${hoursLabel(selectedHours)} × ${CURRENCY_SYMBOL}${selectedPlayers <= 1 ? hourlyRate : 125}/hr`;
     }
 
     function upiPaySection(amount) {
-      const upiPIBody = `pa=${UPI_ID}&pn=OnClock&am=${amount}&cu=${window.CURRENCY_CODE}`;
+      const upiPIBody = `pa=${UPI_ID}&pn=OnClock&am=${amount}&cu=INR`;
       const upiLink = `upi://pay?${upiPIBody}`;
       return `
         <div style="background:var(--card);border:1px solid rgba(108,92,231,0.3);border-radius:16px;padding:20px;margin:20px 0;">
@@ -883,7 +898,7 @@
               </div>
             </div>
             <p style="text-align:center;font-size:12px;color:var(--text-soft);margin-top:15px;">
-              Please pay ${window.CURRENCY_SYMBOL}${data.total} at the counter when done
+              Please pay ${CURRENCY_SYMBOL}${data.total} at the counter when done
             </p>
           `;
           document.getElementById('content').parentNode.appendChild(trackingBanner);
@@ -938,7 +953,7 @@
             `Time: ${timeVal}\n` +
             `Duration: ${hoursLabel(selectedHours)}\n` +
             `Players: ${selectedPlayers}\n` +
-            `Total: ${window.CURRENCY_SYMBOL}${data.total}\\n` +
+            `Total: ${CURRENCY_SYMBOL}${data.total}\n` +
             `Booking ID: ${data.booking_id}\n\n` +
             `✅ *Please find payment screenshot attached.*`
           );
@@ -965,7 +980,7 @@
                   <span style="color:var(--text-soft);">Players</span><span style="font-weight:600;">${selectedPlayers}</span>
                 </div>
                 <div style="display:flex;justify-content:space-between;padding:8px 0;">
-                  <span style="color:var(--text-soft);">Total</span><span style="color:var(--success);font-size:20px;font-weight:700;">${window.CURRENCY_SYMBOL}${data.total}</span>
+                  <span style="color:var(--text-soft);">Total</span><span style="color:var(--success);font-size:20px;font-weight:700;">${CURRENCY_SYMBOL}${data.total}</span>
                 </div>
               </div>
               ${upiPaySection(Math.round(data.total))}
@@ -1062,10 +1077,10 @@
               </div>
               <div class="session-info">
                 <div><span>Duration</span><span>${hours} hr${hours !== 1 ? 's' : ''}</span></div>
-                <div><span>Rate</span><span>${window.CURRENCY_SYMBOL}${rate}/hr</span></div>
-                <div><span>Total</span><span style="color:var(--warning);font-size:20px;font-weight:700;">${window.CURRENCY_SYMBOL}${Math.round(total)}</span></div>
+                <div><span>Rate</span><span>${CURRENCY_SYMBOL}${rate}/hr</span></div>
+                <div><span>Total</span><span style="color:var(--warning);font-size:20px;font-weight:700;">${CURRENCY_SYMBOL}${Math.round(total)}</span></div>
               </div>
-              <p style="text-align:center;padding:30px 0 10px;color:var(--text-soft);">Your session has ended. Please pay ${window.CURRENCY_SYMBOL}${Math.round(total)} using the options below:</p>
+              <p style="text-align:center;padding:30px 0 10px;color:var(--text-soft);">Your session has ended. Please pay ${CURRENCY_SYMBOL}${Math.round(total)} using the options below:</p>
               ${upiPaySection(Math.round(total))}
               <a href="/" style="display:block;text-align:center;padding:15px;background:var(--primary);color:white;text-decoration:none;border-radius:12px;margin-top:15px;">Back to Stations</a>
             `;
@@ -1094,13 +1109,13 @@
                   <span>Duration</span><span>${hours} hr${hours !== 1 ? 's' : ''}</span>
                 </div>
                 <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.1);">
-                  <span>Rate</span><span>${window.CURRENCY_SYMBOL}${rate}/hr</span>
+                  <span>Rate</span><span>${CURRENCY_SYMBOL}${rate}/hr</span>
                 </div>
                 <div style="display:flex;justify-content:space-between;padding:10px 0;">
-                  <span>Total</span><span style="color:var(--warning);font-size:24px;font-weight:700;">${window.CURRENCY_SYMBOL}${Math.round(total)}</span>
+                  <span>Total</span><span style="color:var(--warning);font-size:24px;font-weight:700;">${CURRENCY_SYMBOL}${Math.round(total)}</span>
                 </div>
               </div>
-              <p style="font-size:14px;color:var(--text-soft);margin-top:20px;">Please pay ${window.CURRENCY_SYMBOL}${Math.round(total)} using the options below:</p>
+              <p style="font-size:14px;color:var(--text-soft);margin-top:20px;">Please pay ${CURRENCY_SYMBOL}${Math.round(total)} using the options below:</p>
               ${upiPaySection(Math.round(total))}
             </div>
             <a href="/" style="display:block;text-align:center;padding:15px;background:var(--primary);color:white;text-decoration:none;border-radius:12px;margin:15px;">Play Again</a>

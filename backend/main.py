@@ -159,6 +159,11 @@ def get_currency_config():
         "upi_id": os.getenv("UPI_ID", ""),
     }
 
+# ─── Currency Config ─────────────────────────────────────────────
+CURRENCY = os.getenv("CURRENCY", "INR")
+CURRENCY_SYMBOL = os.getenv("CURRENCY_SYMBOL", "₹")
+IS_INR = CURRENCY.upper() == "INR"
+
 # ─── Password Hashing ───────────────────────────────────────────────
 
 def hash_password(password: str) -> str:
@@ -295,6 +300,25 @@ async def upi_qr():
 async def get_config():
     """Return business configuration including currency settings."""
     return get_currency_config()
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# PUBLIC CONFIG
+# ═══════════════════════════════════════════════════════════════════════
+
+
+@app.get("/api/config")
+async def get_config():
+    """Public config — currency, business name, etc."""
+    return {
+        "currency": CURRENCY,
+        "currency_symbol": CURRENCY_SYMBOL,
+        "is_inr": IS_INR,
+        "business_name": BUSINESS_NAME,
+        "hourly_rate": HOURLY_RATE,
+        "upi_id": os.getenv("UPI_ID", ""),
+        "upi_payee_name": os.getenv("UPI_PAYEE_NAME", ""),
+    }
 
 
 # ═══════════════════════════════════════════════════════════════════════
