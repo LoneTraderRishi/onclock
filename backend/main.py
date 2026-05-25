@@ -300,17 +300,6 @@ async def upi_qr():
 
 @app.get("/api/config")
 async def get_config():
-    """Return business configuration including currency settings."""
-    return get_currency_config()
-
-
-# ═══════════════════════════════════════════════════════════════════════
-# PUBLIC CONFIG
-# ═══════════════════════════════════════════════════════════════════════
-
-
-@app.get("/api/config")
-async def get_config():
     """Public config — currency, business name, etc."""
     return {
         "currency": CURRENCY,
