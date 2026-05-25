@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Session Timer - Onclock</title>
+  <title>Session Timer - OnClock</title>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -128,7 +128,7 @@
 </head>
 <body>
   <div class="container">
-    <div class="brand"><img src="/onclock-logo.jpg" alt="Onclock" style="height:60px;width:auto;margin-bottom:6px;border-radius:10px;"><div class="brand-name">ONCLOCK</div></div>
+    <div class="brand"><img src="/onclock-logo.jpg" alt="OnClock" style="height:60px;width:auto;margin-bottom:6px;border-radius:10px;"><div class="brand-name">ONCLOCK</div></div>
 
     <div class="loading" id="loadingState"><div class="spinner"></div><p>Loading session...</p></div>
     <div class="error" id="errorState" style="display:none;"><p>⚠️ Session not found</p><p style="font-size:14px;margin-top:10px;color:var(--text-soft);">This link may be invalid or expired.</p></div>
@@ -319,7 +319,7 @@
 
       const upi = 'your-upi-id@upi';
       const upiPIBody = 'pa=' + encodeURIComponent(upi) +
-        '&pn=Onclock&am=' + total + '&cu=INR&tn=PS' + psNum + '%20Gaming';
+        '&pn=OnClock&am=' + total + '&cu=INR&tn=Station+' + stationNum;
       const upiLink = 'upi://pay?' + upiPIBody;
       const upiEncoded = encodeURIComponent(upiLink);
 
@@ -333,11 +333,11 @@
       document.getElementById('paytmLink').href = 'paytmmp://upi/pay?' + upiPIBody;
 
       const waMsg = encodeURIComponent(
-        '🎮 Payment for Onclock Gaming\n\nStation: PS ' + psNum + '\nPlayer: ' + playerName +
+        '💳 Payment\n\nStation: ' + stationNum + '\nPlayer: ' + playerName +
         '\nAmount: ₹' + total + '\nUPI: ' + upi + '\n\n(Attach payment screenshot)'
       );
       document.getElementById('payWhatsApp').href = 'https://wa.me/0000000000?text=' + waMsg;
-      document.getElementById('whatsappLink').href = 'https://wa.me/0000000000?text=Hi,%20my%20PS' + psNum + '%20session%20ended.%20Amount:%20₹' + total;
+      document.getElementById('whatsappLink').href = 'https://wa.me/0000000000?text=Hi,%20my%20Station' + stationNum + '%20session%20ended.%20Amount:%20₹' + total;
 
       document.getElementById('paymentCard').classList.add('show');
     }

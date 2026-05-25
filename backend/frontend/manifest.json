@@ -1,6 +1,6 @@
 {
-  "name": "Onclock — Cyber Cafe",
-  "short_name": "Onclock",
+  "name": "OnClock — Station Management",
+  "short_name": "OnClock",
   "description": "Book gaming stations, track sessions, manage your cyber cafe.",
   "start_url": "/",
   "display": "standalone",

@@ -1,5 +1,5 @@
 <div align="center">
-  <h1>⏱️ Onclock</h1>
+  <h1>⏱️ OnClock</h1>
   <p><strong>Station Management Platform — Session tracking, billing & monitoring for any station-based business</strong></p>
   <p>
     <a href="#features">Features</a> •
@@ -18,7 +18,7 @@
 
 ---
 
-Onclock is a **production-ready session management platform** for any business with bookable stations, slots, or units. It handles the full lifecycle — customer booking → live timer → billing → owner monitoring — so you don't have to build any of it.
+OnClock is a **production-ready session management platform** for any business with bookable stations, slots, or units. It handles the full lifecycle — customer booking → live timer → billing → owner monitoring — so you don't have to build any of it.
 
 ---
 
@@ -54,7 +54,7 @@ Onclock is a **production-ready session management platform** for any business w
 
 ### 🏠 And Anything With Slots
 *Any business where customers pay for time in a specific spot.*
-> Barber chairs, massage rooms, karaoke booths, study rooms, photography studios, music practice rooms — if you charge by time per unit, Onclock works.
+> Barber chairs, massage rooms, karaoke booths, study rooms, photography studios, music practice rooms — if you charge by time per unit, OnClock works.
 
 ---
 

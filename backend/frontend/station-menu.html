@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Station - Onclock</title>
+  <title>Station - OnClock</title>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -354,7 +354,7 @@
 <body>
   <div class="header">
     <a href="/" class="back-link">← Back to Stations</a>
-    <img src="/onclock-logo.jpg" alt="Onclock" style="height:50px;width:auto;margin-bottom:10px;border-radius:10px;">
+    <img src="/onclock-logo.jpg" alt="OnClock" style="height:50px;width:auto;margin-bottom:10px;border-radius:10px;">
     <div class="ps-label">Station</div>
     <div class="ps-number" id="psNumber">--</div>
     <div style="font-size:10px;color:rgba(255,255,255,0.5);margin-top:8px;">
@@ -744,7 +744,7 @@
     }
 
     function upiPaySection(amount) {
-      const upiPIBody = `pa=${UPI_ID}&pn=Onclock&am=${amount}&cu=INR`;
+      const upiPIBody = `pa=${UPI_ID}&pn=OnClock&am=${amount}&cu=INR`;
       const upiLink = `upi://pay?${upiPIBody}`;
       return `
         <div style="background:var(--card);border:1px solid rgba(108,92,231,0.3);border-radius:16px;padding:20px;margin:20px 0;">

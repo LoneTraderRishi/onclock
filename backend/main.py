@@ -31,7 +31,7 @@ load_dotenv()
 # Validate environment at startup
 validate_env()
 
-app = FastAPI(title="Onclock — Station Management API")
+app = FastAPI(title="OnClock — Station Management API")
 
 # CORS — restrict to known origins
 ALLOWED_ORIGINS = [

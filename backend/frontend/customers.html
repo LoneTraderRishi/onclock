@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Onclock - Customers</title>
+  <title>OnClock - Customers</title>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -277,7 +277,7 @@
   <!-- Login -->
   <div class="login-wrap" id="loginWrap">
     <div class="login-box">
-      <img src="/onclock-logo.jpg" alt="Onclock" style="height:75px;width:auto;margin-bottom:12px;border-radius:12px;">
+      <img src="/onclock-logo.jpg" alt="OnClock" style="height:75px;width:auto;margin-bottom:12px;border-radius:12px;">
       <h1>👥 Customers</h1>
       <p>Customer database for marketing</p>
       <input type="password" id="passwordInput" placeholder="Dashboard password" onkeydown="if(event.key==='Enter')login()">
@@ -289,7 +289,7 @@
   <div class="dashboard" id="dashboard">
     <div class="top-bar">
       <div class="top-bar-left">
-        <img src="/onclock-logo.jpg" alt="Onclock" class="dashboard-logo-img">
+        <img src="/onclock-logo.jpg" alt="OnClock" class="dashboard-logo-img">
         <div>
           <div class="brand-name-text">CUSTOMER DATABASE</div>
           <div class="brand-sub">Marketing &amp; Outreach</div>
@@ -383,7 +383,7 @@
           const first = c.first_visit ? new Date(c.first_visit).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: '2-digit' }) : '—';
           const last = c.last_visit ? new Date(c.last_visit).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: '2-digit' }) : '—';
           const cleanPhone = c.phone.replace(/[^0-9]/g, '');
-          const msg = encodeURIComponent(`Hi ${c.name}! 👋 This is Onclock. Special offers available — come play! 🎮 PS${c.favourite_station || '1-4'} await you.`);
+          const msg = encodeURIComponent(`Hi ${c.name}! 👋 This is OnClock. Special offers available — special offers await you!`);
           const waUrl = `https://wa.me/91${cleanPhone}?text=${msg}`;
           const favPs = c.favourite_station ? `PS ${c.favourite_station}` : '—';
           return `<tr>
@@ -406,7 +406,7 @@
     }
 
     function customWa(phone, name) {
-      const msg = prompt(`Message for ${name}:`, `Hi ${name}! 👋 This is Onclock.`);
+      const msg = prompt(`Message for ${name}:`, `Hi ${name}! 👋 This is OnClock.`);
       if (msg) {
         window.open(`https://wa.me/91${phone}?text=${encodeURIComponent(msg)}`, '_blank');
       }

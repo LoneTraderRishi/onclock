@@ -1,4 +1,4 @@
-// Onclock service worker — minimal, network-first.
+// OnClock service worker — minimal, network-first.
 // We don't aggressively cache because station availability changes frequently.
 const CACHE_NAME = 'onclock-shell-v1';
 const PRECACHE = ['/', '/manifest.json', '/icon.svg'];
